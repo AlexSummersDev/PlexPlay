@@ -188,7 +188,12 @@ const useSettingsStore = create<SettingsState>()(
           return isConnected;
         } catch (error: any) {
           const msg = typeof error?.message === "string" ? error.message : "Connection failed";
-          set({ iptv: { ...iptv, isConnected: false, lastError: msg } });
+          let host = iptv.serverUrl;
+          try {
+            const u = new URL(host.startsWith("http") ? host : `http://${host}`);
+            host = u.host;
+          } catch {}
+          set({ iptv: { ...iptv, isConnected: false, lastError: `${msg} (server: ${host})` } });
           return false;
         }
       },

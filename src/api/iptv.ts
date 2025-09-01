@@ -58,11 +58,23 @@ class IPTVService {
   private password: string = "";
 
   setCredentials(serverUrl: string, username: string, password: string) {
-    let url = serverUrl.trim();
-    if (!/^https?:\/\//i.test(url)) {
-      url = `http://${url}`;
+    let input = serverUrl.trim();
+    if (!/^https?:\/\//i.test(input)) {
+      input = `http://${input}`;
     }
-    this.serverUrl = url.replace(/\/$/, "");
+    try {
+      const u = new URL(input);
+      // Strip common Xtream suffixes from path, keep only origin
+      const path = u.pathname.replace(/\/$/, "");
+      const suffixes = [/\/c$/i, /\/player_api\.php$/i, /\/panel_api\.php$/i, /\/get\.php$/i];
+      if (suffixes.some((re) => re.test(path))) {
+        u.pathname = "/";
+      }
+      this.serverUrl = `${u.protocol}//${u.host}`;
+    } catch {
+      // Fallback: remove any path portion
+      this.serverUrl = input.replace(/\/{1}.*$/, "").replace(/\/$/, "");
+    }
     this.username = username.trim();
     this.password = password.trim();
   }
@@ -109,23 +121,83 @@ class IPTVService {
     };
 
     try {
-      let response = await fetchWithTimeout(primary);
-      if (!response.ok) {
-        throw new Error(`IPTV API Error: ${response.status} ${response.statusText}`);
-      }
-      return await response.json();
-    } catch (err) {
-      // Protocol fallback
+      // Build origin candidates (protocol swap + common ports if missing)
+      let origins: string[] = [];
       try {
-        const alt = this.serverUrl.startsWith("https") ? this.serverUrl.replace(/^https:/, "http:") : this.serverUrl.replace(/^http:/, "https:");
-        const response2 = await fetchWithTimeout(buildUrl(alt));
-        if (!response2.ok) {
-          throw new Error(`IPTV API Error: ${response2.status} ${response2.statusText}`);
+        const base = new URL(this.serverUrl + "/");
+        const protos = base.protocol === "https:" ? ["https:", "http:"] : ["http:", "https:"];
+        const hasPort = base.port && base.port.length > 0;
+        const hostNoPort = base.hostname;
+        const ports = hasPort ? [base.port] : ["8080", "80"];
+        for (const p of protos) {
+          if (hasPort) {
+            origins.push(`${p}//${hostNoPort}:${base.port}`);
+          } else {
+            origins.push(`${p}//${hostNoPort}`);
+            for (const port of ports) origins.push(`${p}//${hostNoPort}:${port}`);
+          }
         }
-        return await response2.json();
-      } catch (err2) {
-        throw toFriendly(err2);
+      } catch {
+        origins = [this.serverUrl];
       }
+      origins = Array.from(new Set(origins));
+
+      let lastErr: any = null;
+
+      for (const origin of origins) {
+        // Try player_api with action
+        try {
+          const u1 = new URL(`${origin}/player_api.php`);
+          u1.searchParams.append("action", action);
+          const allParams = { ...this.getBaseParams(), ...params };
+          Object.entries(allParams).forEach(([k, v]) => u1.searchParams.append(k, v));
+          const r1 = await fetchWithTimeout(u1.toString());
+          if (r1.ok) {
+            return (await r1.json()) as T;
+          }
+          lastErr = new Error(`IPTV API Error: ${r1.status} ${r1.statusText}`);
+        } catch (e) {
+          lastErr = e;
+        }
+
+        // Try player_api without action
+        try {
+          const u2 = new URL(`${origin}/player_api.php`);
+          const allParams2 = { ...this.getBaseParams(), ...params };
+          Object.entries(allParams2).forEach(([k, v]) => u2.searchParams.append(k, v));
+          const r2 = await fetchWithTimeout(u2.toString());
+          if (r2.ok) {
+            const j2 = await r2.json();
+            if (action === "get_user_info" && j2 && j2.user_info) {
+              return j2.user_info as T;
+            }
+          }
+        } catch (e2) {
+          lastErr = e2;
+        }
+
+        // Try panel_api for user info
+        if (action === "get_user_info") {
+          try {
+            const u3 = new URL(`${origin}/panel_api.php`);
+            const allParams3 = { ...this.getBaseParams() };
+            Object.entries(allParams3).forEach(([k, v]) => u3.searchParams.append(k, v));
+            const r3 = await fetchWithTimeout(u3.toString());
+            if (r3.ok) {
+              const j3 = await r3.json();
+              if (j3 && j3.user_info) {
+                return j3.user_info as T;
+              }
+            }
+          } catch (e3) {
+            lastErr = e3;
+          }
+        }
+      }
+
+      throw lastErr || new Error("Unable to contact IPTV server");
+    } catch (finalErr) {
+      throw toFriendly(finalErr);
     }
   }
 

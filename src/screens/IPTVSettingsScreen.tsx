@@ -239,6 +239,14 @@ export default function IPTVSettingsScreen() {
             </View>
           </View>
 
+          <View className="bg-gray-800/30 rounded-lg p-4 mb-4">
+            <Text className="text-gray-200 font-medium mb-2">Troubleshooting tips</Text>
+            <Text className="text-gray-400 text-sm mb-1">• Include the port in your URL (e.g. http://1.2.3.4:8080)</Text>
+            <Text className="text-gray-400 text-sm mb-1">• Remove trailing paths like /c or /player_api.php</Text>
+            <Text className="text-gray-400 text-sm mb-1">• Try http instead of https if your server uses self-signed SSL</Text>
+            <Text className="text-gray-400 text-sm">• Ensure the device is on the same network and the server allows connections</Text>
+          </View>
+
           <ActionButton
             title="Reset All Settings"
             icon="refresh"
