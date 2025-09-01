@@ -7,7 +7,7 @@ import { TVShowsStackParamList } from "../types/navigation";
 import { Movie, TVShow } from "../types/media";
 import useMediaStore from "../state/mediaStore";
 import { SearchBar, HorizontalCarousel, LoadingSpinner, ErrorState } from "../components";
-import { ExtendedTMDBService, mockTVShows } from "../api/tmdb";
+import tmdbService, { ExtendedTMDBService, mockTVShows } from "../api/tmdb";
 
 type TVHomeScreenNavigationProp = NativeStackNavigationProp<TVShowsStackParamList, "Home">;
 
@@ -43,14 +43,30 @@ export default function TVHomeScreen() {
       setError(null);
       setLoadingTVShows(true);
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Use mock data for now
-      setPopularTVShows(mockTVShows);
-      setTrendingTVShows(mockTVShows);
-      setTopRatedTVShows(mockTVShows);
-      setAiringTodayTVShows(mockTVShows);
+      // Try live TMDB data first
+      try {
+        const [trendingRes, popularRes, topRatedRes, airingTodayRes] = await Promise.all([
+          tmdbService.getTrendingTVShows("week"),
+          tmdbService.getPopularTVShows(),
+          tmdbService.getTopRatedTVShows(),
+          tmdbService.getAiringTodayTVShows(),
+        ]);
+        setTrendingTVShows((trendingRes?.results || []).slice(0, 20));
+        setPopularTVShows((popularRes?.results || []).slice(0, 20));
+        setTopRatedTVShows((topRatedRes?.results || []).slice(0, 20));
+        setAiringTodayTVShows((airingTodayRes?.results || []).slice(0, 20));
+      } catch {
+        const pad = (arr: typeof mockTVShows, n: number = 12) => {
+          const base = arr && arr.length ? arr : mockTVShows;
+          const out: typeof mockTVShows = [] as any;
+          for (let i = 0; i < n; i++) out.push(base[i % base.length]);
+          return out as any;
+        };
+        setPopularTVShows(pad(mockTVShows));
+        setTrendingTVShows(pad(mockTVShows));
+        setTopRatedTVShows(pad(mockTVShows));
+        setAiringTodayTVShows(pad(mockTVShows));
+      }
 
       // Try provider sections if TMDB key available
       try {
