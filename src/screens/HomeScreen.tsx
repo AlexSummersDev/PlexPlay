@@ -7,7 +7,7 @@ import { MoviesStackParamList } from "../types/navigation";
 import { Movie, TVShow } from "../types/media";
 import useMediaStore from "../state/mediaStore";
 import { SearchBar, HorizontalCarousel, LoadingSpinner, ErrorState } from "../components";
-import tmdbService, { ExtendedTMDBService, mockMovies, mockTVShows } from "../api/tmdb";
+import tmdbService, { ExtendedTMDBService, mockMovies } from "../api/tmdb";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<MoviesStackParamList, "Home">;
 
@@ -22,15 +22,11 @@ export default function HomeScreen() {
     trendingMovies,
     topRatedMovies,
     upcomingMovies,
-    popularTVShows,
-    trendingTVShows,
     isLoadingMovies,
     setPopularMovies,
     setTrendingMovies,
     setTopRatedMovies,
     setUpcomingMovies,
-    setPopularTVShows,
-    setTrendingTVShows,
     setLoadingMovies,
   } = useMediaStore();
 
@@ -58,16 +54,30 @@ export default function HomeScreen() {
       //   tmdbService.getTrendingTVShows(),
       // ]);
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Use mock data for now
-      setPopularMovies(mockMovies);
-      setTrendingMovies(mockMovies);
-      setTopRatedMovies(mockMovies);
-      setUpcomingMovies(mockMovies);
-      setPopularTVShows(mockTVShows);
-      setTrendingTVShows(mockTVShows);
+      // Try live TMDB data first
+      try {
+        const [trendingRes, popularRes, topRatedRes, upcomingRes] = await Promise.all([
+          tmdbService.getTrendingMovies("week"),
+          tmdbService.getPopularMovies(),
+          tmdbService.getTopRatedMovies(),
+          tmdbService.getUpcomingMovies(),
+        ]);
+        setTrendingMovies((trendingRes?.results || []).slice(0, 20));
+        setPopularMovies((popularRes?.results || []).slice(0, 20));
+        setTopRatedMovies((topRatedRes?.results || []).slice(0, 20));
+        setUpcomingMovies((upcomingRes?.results || []).slice(0, 20));
+      } catch {
+        const pad = (arr: typeof mockMovies, n: number = 12) => {
+          const base = arr && arr.length ? arr : mockMovies;
+          const out: typeof mockMovies = [] as any;
+          for (let i = 0; i < n; i++) out.push(base[i % base.length]);
+          return out as any;
+        };
+        setPopularMovies(pad(mockMovies));
+        setTrendingMovies(pad(mockMovies));
+        setTopRatedMovies(pad(mockMovies));
+        setUpcomingMovies(pad(mockMovies));
+      }
 
       // Try provider sections if TMDB key available
       try {
@@ -243,23 +253,7 @@ export default function HomeScreen() {
            ) : null
          ))}
  
-         <HorizontalCarousel
-          title="Popular TV Shows"
-          data={popularTVShows}
-          onItemPress={handleItemPress}
-          onSeeAllPress={handleSeeAllPress}
-          loading={isLoadingMovies}
-          showRating
-        />
 
-        <HorizontalCarousel
-          title="Trending TV Shows"
-          data={trendingTVShows}
-          onItemPress={handleItemPress}
-          onSeeAllPress={handleSeeAllPress}
-          loading={isLoadingMovies}
-          showRating
-        />
 
         {/* Add some bottom padding for better scrolling */}
         <SafeAreaView edges={["bottom"]} />
