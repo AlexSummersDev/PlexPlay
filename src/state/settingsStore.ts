@@ -17,6 +17,7 @@ interface IPTVSettings {
   password: string;
   isConnected: boolean;
   favoriteChannels: string[];
+  lastError?: string | null;
 }
 
 interface DownloadSettings {
@@ -89,6 +90,7 @@ const defaultIPTVSettings: IPTVSettings = {
   password: "",
   isConnected: false,
   favoriteChannels: [],
+  lastError: null,
 };
 
 const defaultDownloadSettings: DownloadSettings = {
@@ -181,11 +183,12 @@ const useSettingsStore = create<SettingsState>()(
           const iptvService = (await import("../api/iptv")).default;
           iptvService.setCredentials(iptv.serverUrl, iptv.username, iptv.password);
           const info = await iptvService.getUserInfo();
-          const isConnected = (info as any)?.auth === 1 || (info as any)?.status === "Active";
-          set({ iptv: { ...iptv, isConnected } });
+          const isConnected = (info as any)?.auth === 1 || String((info as any)?.status || "").toLowerCase() === "active";
+          set({ iptv: { ...iptv, isConnected, lastError: null } });
           return isConnected;
-        } catch (error) {
-          set({ iptv: { ...iptv, isConnected: false } });
+        } catch (error: any) {
+          const msg = typeof error?.message === "string" ? error.message : "Connection failed";
+          set({ iptv: { ...iptv, isConnected: false, lastError: msg } });
           return false;
         }
       },

@@ -58,9 +58,13 @@ class IPTVService {
   private password: string = "";
 
   setCredentials(serverUrl: string, username: string, password: string) {
-    this.serverUrl = serverUrl.replace(/\/$/, ""); // Remove trailing slash
-    this.username = username;
-    this.password = password;
+    let url = serverUrl.trim();
+    if (!/^https?:\/\//i.test(url)) {
+      url = `http://${url}`;
+    }
+    this.serverUrl = url.replace(/\/$/, "");
+    this.username = username.trim();
+    this.password = password.trim();
   }
 
   private getBaseParams(): Record<string, string> {
@@ -75,25 +79,53 @@ class IPTVService {
       throw new Error("IPTV credentials not configured");
     }
 
-    const url = new URL(`${this.serverUrl}/player_api.php`);
-    url.searchParams.append("action", action);
-    
-    const allParams = { ...this.getBaseParams(), ...params };
-    Object.entries(allParams).forEach(([key, value]) => {
-      url.searchParams.append(key, value);
-    });
+    const buildUrl = (base: string) => {
+      const u = new URL(`${base}/player_api.php`);
+      u.searchParams.append("action", action);
+      const allParams = { ...this.getBaseParams(), ...params };
+      Object.entries(allParams).forEach(([key, value]) => u.searchParams.append(key, value));
+      return u.toString();
+    };
+
+    const primary = buildUrl(this.serverUrl);
+
+    const fetchWithTimeout = async (resource: string, timeout = 10000) => {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      try {
+        const resp = await fetch(resource, { signal: controller.signal });
+        return resp;
+      } finally {
+        clearTimeout(id);
+      }
+    };
+
+    const toFriendly = (e: any) => {
+      const msg = String(e?.message || e);
+      if (msg.includes("Network request failed") || msg.includes("abort") || msg.includes("Failed to fetch")) {
+        return new Error("Unable to reach IPTV server. Check URL, port, and network connectivity.");
+      }
+      return new Error(msg);
+    };
 
     try {
-      const response = await fetch(url.toString());
-      
+      let response = await fetchWithTimeout(primary);
       if (!response.ok) {
         throw new Error(`IPTV API Error: ${response.status} ${response.statusText}`);
       }
-      
       return await response.json();
-    } catch (error) {
-      console.error("IPTV API request failed:", error);
-      throw error;
+    } catch (err) {
+      // Protocol fallback
+      try {
+        const alt = this.serverUrl.startsWith("https") ? this.serverUrl.replace(/^https:/, "http:") : this.serverUrl.replace(/^http:/, "https:");
+        const response2 = await fetchWithTimeout(buildUrl(alt));
+        if (!response2.ok) {
+          throw new Error(`IPTV API Error: ${response2.status} ${response2.statusText}`);
+        }
+        return await response2.json();
+      } catch (err2) {
+        throw toFriendly(err2);
+      }
     }
   }
 

@@ -97,6 +97,7 @@ export default function LiveTVScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [usedMock, setUsedMock] = useState(false);
 
   useEffect(() => {
     if (iptv.isConnected) {
@@ -123,10 +124,12 @@ export default function LiveTVScreen() {
         const cats = await iptvService.getLiveTVCategories();
         categoriesData = cats as any;
         channelsData = await iptvService.getLiveTVChannels();
+        setUsedMock(false);
       } catch (e) {
         // Fallback to mock data if provider fails
         channelsData = iptvService.getMockChannels() as any;
         categoriesData = iptvService.getMockCategories() as any;
+        setUsedMock(true);
       }
 
       setChannels(channelsData);
@@ -268,6 +271,13 @@ export default function LiveTVScreen() {
         <Text className="text-gray-400 text-sm px-4 mb-3">
           {filteredChannels.length} channel{filteredChannels.length !== 1 ? "s" : ""} available
         </Text>
+      )}
+
+      {/* Mock banner */}
+      {usedMock && (
+        <View className="mx-4 mb-2 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+          <Text className="text-blue-200 text-xs">Showing demo channel data. Verify IPTV connection in Settings.</Text>
+        </View>
       )}
 
       {/* Channels List */}

@@ -21,6 +21,11 @@
           "com.apple.developer.parent-application-identifiers": ["com.vibecode.app"],
           "com.apple.developer.associated-domains": ["appclips:vibecode.app"]
         }
+      },
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
       }
     },
     "android": {

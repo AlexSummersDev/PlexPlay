@@ -18,11 +18,18 @@ export default function IPTVSettingsScreen() {
   const [password, setPassword] = useState(iptv.password);
   const [testing, setTesting] = useState(false);
 
+  const normalizeUrl = (url: string) => {
+    let u = url.trim();
+    if (!/^https?:\/\//i.test(u)) u = `http://${u}`;
+    return u.replace(/\/$/, "");
+  };
+
   const handleSave = () => {
     updateIPTVSettings({
-      serverUrl: serverUrl.trim(),
+      serverUrl: normalizeUrl(serverUrl),
       username: username.trim(),
       password: password.trim(),
+      lastError: null,
     });
     Alert.alert("Settings Saved", "IPTV settings have been updated.");
   };
@@ -35,9 +42,10 @@ export default function IPTVSettingsScreen() {
 
     // Update settings first
     updateIPTVSettings({
-      serverUrl: serverUrl.trim(),
+      serverUrl: normalizeUrl(serverUrl),
       username: username.trim(),
       password: password.trim(),
+      lastError: null,
     });
 
     setTesting(true);
@@ -86,6 +94,7 @@ export default function IPTVSettingsScreen() {
             isConnected={iptv.isConnected}
             serviceName="IPTV Service (Xtream Codes)"
             lastChecked={new Date()}
+            error={iptv.lastError || undefined}
           />
         </View>
 
