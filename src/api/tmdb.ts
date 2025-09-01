@@ -5,7 +5,34 @@ const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
 
 // Try to read from env first, fallback to empty string (uses mocks)
-const TMDB_API_KEY = (process.env.EXPO_PUBLIC_TMDB_API_KEY || process.env.TMDB_API_KEY || "");
+const ENV_TMDB_API_KEY = (process.env.EXPO_PUBLIC_TMDB_API_KEY || process.env.TMDB_API_KEY || "");
+
+// Runtime override (from Settings)
+let RUNTIME_TMDB_API_KEY: string = "";
+export function setTMDBRuntimeApiKey(key: string) {
+  RUNTIME_TMDB_API_KEY = (key || "").trim();
+}
+
+async function resolveApiKey(): Promise<string> {
+  if (RUNTIME_TMDB_API_KEY) return RUNTIME_TMDB_API_KEY;
+  try {
+    // Lazy import to avoid circular deps
+    const store = (await import("../state/settingsStore")).default.getState();
+    if (store?.app?.tmdbApiKey) return store.app.tmdbApiKey;
+  } catch {}
+  return ENV_TMDB_API_KEY;
+}
+
+export async function testTMDBKey(key: string): Promise<boolean> {
+  const url = new URL(`${TMDB_BASE_URL}/configuration`);
+  url.searchParams.append("api_key", (key || "").trim());
+  try {
+    const res = await fetch(url.toString());
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 
 interface TMDBResponse<T> {
   page: number;
@@ -21,12 +48,13 @@ interface TMDBError {
 
 class TMDBService {
   private async makeRequest<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
-    if (!TMDB_API_KEY) {
+    const apiKey = await resolveApiKey();
+    if (!apiKey) {
       // @ts-ignore
       throw new Error("TMDB_API_KEY missing");
     }
     const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
-    url.searchParams.append("api_key", TMDB_API_KEY);
+    url.searchParams.append("api_key", apiKey);
     
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.append(key, value);

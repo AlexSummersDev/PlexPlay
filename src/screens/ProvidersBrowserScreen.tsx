@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { HorizontalCarousel, LoadingSpinner, ErrorState } from "../components";
-import useMediaStore from "../state/mediaStore";
-import tmdbService, { ExtendedTMDBService } from "../api/tmdb";
+import { ExtendedTMDBService, mockMovies, mockTVShows } from "../api/tmdb";
 
 const PROVIDERS: { id: number; name: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { id: 337, name: "Disney+", icon: "logo-disney" as any },
@@ -17,9 +17,11 @@ const PROVIDERS: { id: number; name: string; icon: keyof typeof Ionicons.glyphMa
 
 export default function ProvidersBrowserScreen() {
   const [selectedProviderIds, setSelectedProviderIds] = useState<number[]>([337]);
+  const navigation = useNavigation<any>();
   const [region, setRegion] = useState("US");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fallbackUsed, setFallbackUsed] = useState(false);
 
   const [movies, setMovies] = useState<any[]>([]);
   const [shows, setShows] = useState<any[]>([]);
@@ -39,9 +41,11 @@ export default function ProvidersBrowserScreen() {
       setMovies(m.results || []);
       setShows(t.results || []);
     } catch (e) {
-      setError("Unable to load providers data. Check TMDB API key in env.");
-      setMovies([]);
-      setShows([]);
+      // Fallback to mocks with a helpful banner
+      setError(null);
+      setFallbackUsed(true);
+      setMovies(mockMovies);
+      setShows(mockTVShows);
     } finally {
       setLoading(false);
     }
@@ -59,6 +63,20 @@ export default function ProvidersBrowserScreen() {
     <SafeAreaView className="flex-1 bg-black">
       <View className="px-4 pt-2">
         <Text className="text-white text-2xl font-bold mb-3">Browse by Service</Text>
+
+        {fallbackUsed && (
+          <View className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 mb-3">
+            <Text className="text-blue-200 text-sm mb-2">Showing demo data. Add a TMDB API key to see live results.</Text>
+            <Pressable
+              onPress={() => navigation.navigate("Settings")}
+              className="self-start bg-blue-600 rounded-lg px-3 py-1"
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
+              <Text className="text-white text-sm">Open Settings</Text>
+            </Pressable>
+          </View>
+        )}
+
         <FlatList
           data={PROVIDERS}
           keyExtractor={(i) => i.id.toString()}

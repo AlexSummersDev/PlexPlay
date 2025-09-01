@@ -53,6 +53,7 @@ interface AppSettings {
   notifications: boolean;
   autoPlay: boolean;
   videoQuality: "auto" | "720p" | "1080p" | "4k";
+  tmdbApiKey: string;
 }
 
 interface SettingsState {
@@ -132,6 +133,7 @@ const defaultAppSettings: AppSettings = {
   notifications: true,
   autoPlay: false,
   videoQuality: "auto",
+  tmdbApiKey: "",
 };
 
 const useSettingsStore = create<SettingsState>()(

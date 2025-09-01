@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, ScrollView, Pressable, Switch } from "react-native";
+import React, { useState } from "react";
+import { View, Text, ScrollView, Pressable, Switch, TextInput, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -84,6 +84,10 @@ export default function SettingsScreen() {
     updateAppSettings,
   } = useSettingsStore();
 
+  const [tmdbKey, setTmdbKey] = useState(app.tmdbApiKey || "");
+  const [status, setStatus] = useState<{ visible: boolean; title: string; message: string }>({ visible: false, title: "", message: "" });
+  const showStatus = (title: string, message: string) => setStatus({ visible: true, title, message });
+
   const handleThemeToggle = (value: boolean) => {
     updateAppSettings({ theme: value ? "dark" : "light" });
   };
@@ -155,6 +159,47 @@ export default function SettingsScreen() {
               console.log("Video quality settings");
             }}
           />
+        </SettingsSection>
+
+        {/* TMDB API */}
+        <SettingsSection title="TMDB API">
+          <View className="bg-gray-800/50 rounded-lg p-4 mb-3">
+            <Text className="text-gray-300 text-sm font-medium mb-2">API Key</Text>
+            <TextInput
+              className="bg-gray-800 text-white p-3 rounded-lg text-base"
+              placeholder="Paste your TMDB API key"
+              placeholderTextColor="#6B7280"
+              value={tmdbKey}
+              onChangeText={setTmdbKey}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <View className="flex-row mt-3">
+              <Pressable
+                onPress={async () => {
+                  const ok = await (await import("../api/tmdb")).testTMDBKey(tmdbKey);
+                  showStatus(ok ? "TMDB Key Valid" : "TMDB Key Invalid", ok ? "The key works. Save to apply globally." : "Please double-check and try again.");
+                }}
+                className="bg-gray-700 rounded-lg px-4 py-2 mr-2"
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                <Text className="text-white">Test Key</Text>
+              </Pressable>
+              <Pressable
+                onPress={async () => {
+                  updateAppSettings({ tmdbApiKey: tmdbKey.trim() });
+                  const { setTMDBRuntimeApiKey } = await import("../api/tmdb");
+                  setTMDBRuntimeApiKey(tmdbKey.trim());
+                  showStatus("TMDB Key Saved", "Live providers and trailers will use this key.");
+                }}
+                className="bg-blue-600 rounded-lg px-4 py-2"
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                <Text className="text-white">Save Key</Text>
+              </Pressable>
+            </View>
+            <Text className="text-gray-400 text-xs mt-2">Tip: You can also set EXPO_PUBLIC_TMDB_API_KEY in env.</Text>
+          </View>
         </SettingsSection>
 
         {/* Integrations */}
@@ -252,6 +297,28 @@ export default function SettingsScreen() {
         {/* Add some bottom padding */}
         <View className="h-8" />
       </ScrollView>
+
+      {/* Status Modal */}
+      <Modal
+        visible={status.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setStatus({ visible: false, title: "", message: "" })}
+      >
+        <View className="flex-1 items-center justify-center bg-black/60">
+          <View className="bg-gray-900 rounded-xl p-5 w-11/12">
+            <Text className="text-white text-lg font-semibold mb-2">{status.title}</Text>
+            <Text className="text-gray-300 mb-4">{status.message}</Text>
+            <Pressable
+              onPress={() => setStatus({ visible: false, title: "", message: "" })}
+              className="bg-blue-600 rounded-lg px-4 py-2 self-stretch items-center"
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
+              <Text className="text-white">OK</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
