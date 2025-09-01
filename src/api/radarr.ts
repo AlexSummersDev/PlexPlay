@@ -7,6 +7,7 @@ export type RadarrLookupCard = {
   overview?: string;
   imageUrl?: string;
   tmdbId?: number;
+  releaseDate?: string;
 };
 
 interface RadarrMovie {
@@ -207,6 +208,7 @@ class RadarrService {
       overview: item.overview,
       imageUrl: (img?.remoteUrl || img?.url || "") as string,
       tmdbId: item.tmdbId,
+      releaseDate: (item as any).inCinemas || (item as any).digitalRelease,
     };
   }
 

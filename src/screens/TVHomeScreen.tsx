@@ -7,7 +7,7 @@ import { TVShowsStackParamList } from "../types/navigation";
 import { Movie, TVShow } from "../types/media";
 import useMediaStore from "../state/mediaStore";
 import { SearchBar, HorizontalCarousel, LoadingSpinner, ErrorState } from "../components";
-import { mockTVShows } from "../api/tmdb";
+import { ExtendedTMDBService, mockTVShows } from "../api/tmdb";
 
 type TVHomeScreenNavigationProp = NativeStackNavigationProp<TVShowsStackParamList, "Home">;
 
@@ -30,6 +30,14 @@ export default function TVHomeScreen() {
     setLoadingTVShows,
   } = useMediaStore();
 
+  const PROVIDERS = [
+    { id: 8, name: "Netflix" },
+    { id: 337, name: "Disney+" },
+    { id: 9, name: "Prime Video" },
+  ];
+  const [providerShows, setProviderShows] = useState<Record<number, TVShow[]>>({});
+  const [providersEnabled, setProvidersEnabled] = useState(false);
+
   const loadData = async () => {
     try {
       setError(null);
@@ -43,6 +51,26 @@ export default function TVHomeScreen() {
       setTrendingTVShows(mockTVShows);
       setTopRatedTVShows(mockTVShows);
       setAiringTodayTVShows(mockTVShows);
+
+      // Try provider sections if TMDB key available
+      try {
+        const svc = new ExtendedTMDBService();
+        const ids = PROVIDERS.map(p => p.id);
+        const res = await Promise.all(ids.map(async (id) => {
+          try {
+            const r = await svc.discoverTVByProviders([id], "US", 1);
+            return { id, items: r.results || [] };
+          } catch {
+            return { id, items: [] as TVShow[] };
+          }
+        }));
+        const map: Record<number, TVShow[]> = {};
+        res.forEach(({ id, items }) => { map[id] = items; });
+        setProviderShows(map);
+        setProvidersEnabled(true);
+      } catch {
+        setProvidersEnabled(false);
+      }
 
     } catch (err) {
       setError("Failed to load TV shows. Please try again.");
@@ -169,16 +197,30 @@ export default function TVHomeScreen() {
           showRating
         />
 
-        <HorizontalCarousel
-          title="Airing Today"
-          data={airingTodayTVShows}
-          onItemPress={handleItemPress}
-          onSeeAllPress={handleSeeAllPress}
-          loading={isLoadingTVShows}
-        />
+         <HorizontalCarousel
+           title="Airing Today"
+           data={airingTodayTVShows}
+           onItemPress={handleItemPress}
+           onSeeAllPress={handleSeeAllPress}
+           loading={isLoadingTVShows}
+         />
 
-        {/* Add some bottom padding for better scrolling */}
-        <SafeAreaView edges={["bottom"]} />
+         {providersEnabled && PROVIDERS.map(p => (
+           providerShows[p.id] && providerShows[p.id].length > 0 ? (
+             <HorizontalCarousel
+               key={p.id}
+               title={`On ${p.name}`}
+               data={providerShows[p.id]}
+               onItemPress={handleItemPress}
+               onSeeAllPress={handleSeeAllPress}
+               loading={false}
+               showRating
+             />
+           ) : null
+         ))}
+ 
+         {/* Add some bottom padding for better scrolling */}
+         <SafeAreaView edges={["bottom"]} />
       </ScrollView>
     </SafeAreaView>
   );

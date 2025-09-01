@@ -133,6 +133,13 @@ export default function SearchScreen() {
         searchResults = [...searchResults, ...tvResults];
       }
 
+      // Sort newest-first by date (movies: release_date, tv: first_air_date)
+      searchResults.sort((a, b) => {
+        const da = new Date(("title" in a ? (a as any).release_date : (a as any).first_air_date) || 0).getTime();
+        const db = new Date(("title" in b ? (b as any).release_date : (b as any).first_air_date) || 0).getTime();
+        return db - da;
+      });
+
       setResults(searchResults);
       setSearchResults(searchResults);
       setStoreSearchQuery(query);

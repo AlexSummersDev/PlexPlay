@@ -46,7 +46,15 @@ export default function ProvidersBrowserScreen() {
             }
             radarrService.setCredentials(downloads.radarr.serverUrl, downloads.radarr.apiKey);
             const list = await radarrService.searchMovie(q);
-            const mapped = list.map((m: any) => (radarrService as any).mapLookupToCard(m));
+            let mapped = list.map((m: any) => (radarrService as any).mapLookupToCard(m));
+            mapped = mapped.sort((a: any, b: any) => {
+              const ya = a.year || 0, yb = b.year || 0;
+              if (yb !== ya) return yb - ya;
+              const da = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+              const db = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+              if (db !== da) return db - da;
+              return String(a.title || "").localeCompare(String(b.title || ""));
+            });
             setResults(mapped);
           } else {
             if (!configured.sonarr) {
@@ -56,7 +64,15 @@ export default function ProvidersBrowserScreen() {
             }
             sonarrService.setCredentials(downloads.sonarr.serverUrl, downloads.sonarr.apiKey);
             const list = await sonarrService.searchSeries(q);
-            const mapped = list.map((s: any) => (sonarrService as any).mapLookupToCard(s));
+            let mapped = list.map((s: any) => (sonarrService as any).mapLookupToCard(s));
+            mapped = mapped.sort((a: any, b: any) => {
+              const ya = a.year || 0, yb = b.year || 0;
+              if (yb !== ya) return yb - ya;
+              const da = a.firstAired ? new Date(a.firstAired).getTime() : 0;
+              const db = b.firstAired ? new Date(b.firstAired).getTime() : 0;
+              if (db !== da) return db - da;
+              return String(a.name || a.title || "").localeCompare(String(b.name || b.title || ""));
+            });
             setResults(mapped);
           }
         } catch (e) {

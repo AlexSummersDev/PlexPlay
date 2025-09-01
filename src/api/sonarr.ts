@@ -7,6 +7,7 @@ export type SonarrLookupCard = {
   overview?: string;
   imageUrl?: string;
   tvdbId?: number;
+  firstAired?: string;
 };
 
 interface SonarrSeries {
@@ -237,6 +238,7 @@ class SonarrService {
       overview: item.overview,
       imageUrl: (img?.remoteUrl || img?.url || (item as any).remotePoster || "") as string,
       tvdbId: item.tvdbId,
+      firstAired: (item as any).firstAired,
     };
   }
 

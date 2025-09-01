@@ -7,7 +7,7 @@ import { MoviesStackParamList } from "../types/navigation";
 import { Movie, TVShow } from "../types/media";
 import useMediaStore from "../state/mediaStore";
 import { SearchBar, HorizontalCarousel, LoadingSpinner, ErrorState } from "../components";
-import { mockMovies, mockTVShows } from "../api/tmdb";
+import tmdbService, { ExtendedTMDBService, mockMovies, mockTVShows } from "../api/tmdb";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<MoviesStackParamList, "Home">;
 
@@ -33,6 +33,14 @@ export default function HomeScreen() {
     setTrendingTVShows,
     setLoadingMovies,
   } = useMediaStore();
+
+  const PROVIDERS = [
+    { id: 8, name: "Netflix" },
+    { id: 337, name: "Disney+" },
+    { id: 9, name: "Prime Video" },
+  ];
+  const [providerMovies, setProviderMovies] = useState<Record<number, Movie[]>>({});
+  const [providersEnabled, setProvidersEnabled] = useState(false);
 
   const loadData = async () => {
     try {
@@ -60,6 +68,26 @@ export default function HomeScreen() {
       setUpcomingMovies(mockMovies);
       setPopularTVShows(mockTVShows);
       setTrendingTVShows(mockTVShows);
+
+      // Try provider sections if TMDB key available
+      try {
+        const svc = new ExtendedTMDBService();
+        const ids = PROVIDERS.map(p => p.id);
+        const res = await Promise.all(ids.map(async (id) => {
+          try {
+            const r = await svc.discoverMoviesByProviders([id], "US", 1);
+            return { id, items: r.results || [] };
+          } catch {
+            return { id, items: [] as Movie[] };
+          }
+        }));
+        const map: Record<number, Movie[]> = {};
+        res.forEach(({ id, items }) => { map[id] = items; });
+        setProviderMovies(map);
+        setProvidersEnabled(true);
+      } catch {
+        setProvidersEnabled(false);
+      }
 
     } catch (err) {
       setError("Failed to load content. Please try again.");
@@ -184,24 +212,38 @@ export default function HomeScreen() {
           showRating
         />
 
-        <HorizontalCarousel
-          title="Top Rated Movies"
-          data={topRatedMovies}
-          onItemPress={handleItemPress}
-          onSeeAllPress={handleSeeAllPress}
-          loading={isLoadingMovies}
-          showRating
-        />
+         <HorizontalCarousel
+           title="Top Rated Movies"
+           data={topRatedMovies}
+           onItemPress={handleItemPress}
+           onSeeAllPress={handleSeeAllPress}
+           loading={isLoadingMovies}
+           showRating
+         />
+ 
+         <HorizontalCarousel
+           title="Upcoming Movies"
+           data={upcomingMovies}
+           onItemPress={handleItemPress}
+           onSeeAllPress={handleSeeAllPress}
+           loading={isLoadingMovies}
+         />
 
-        <HorizontalCarousel
-          title="Upcoming Movies"
-          data={upcomingMovies}
-          onItemPress={handleItemPress}
-          onSeeAllPress={handleSeeAllPress}
-          loading={isLoadingMovies}
-        />
-
-        <HorizontalCarousel
+         {providersEnabled && PROVIDERS.map(p => (
+           providerMovies[p.id] && providerMovies[p.id].length > 0 ? (
+             <HorizontalCarousel
+               key={p.id}
+               title={`On ${p.name}`}
+               data={providerMovies[p.id]}
+               onItemPress={handleItemPress}
+               onSeeAllPress={handleSeeAllPress}
+               loading={false}
+               showRating
+             />
+           ) : null
+         ))}
+ 
+         <HorizontalCarousel
           title="Popular TV Shows"
           data={popularTVShows}
           onItemPress={handleItemPress}
