@@ -24,6 +24,7 @@ export default function DetailsScreen() {
   const [item, setItem] = useState<Movie | TVShow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [missingKey, setMissingKey] = useState(false);
   const [similarItems, setSimilarItems] = useState<(Movie | TVShow)[]>([]);
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerKey, setTrailerKey] = useState<string | undefined>(undefined);
@@ -42,22 +43,42 @@ export default function DetailsScreen() {
     try {
       setLoading(true);
       setError(null);
+      setMissingKey(false);
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const mod = await import("../api/tmdb");
+      const tmdb = mod.default;
 
-      const mockData = isMovie ? mockMovies : mockTVShows;
-      const foundItem = mockData.find(item => item.id === id);
-
-      if (foundItem) {
-        setItem(foundItem);
-        setSimilarItems(mockData.filter(item => item.id !== id));
-      } else {
-        setError("Content not found");
+      try {
+        if (isMovie) {
+          const details: any = await tmdb.getMovieDetails(id);
+          setItem(details as any);
+          const sims = (details?.similar?.results || details?.recommendations?.results || []) as any[];
+          setSimilarItems((sims as any) as (Movie | TVShow)[]);
+        } else {
+          const details: any = await tmdb.getTVShowDetails(id);
+          setItem(details as any);
+          const sims = (details?.similar?.results || details?.recommendations?.results || []) as any[];
+          setSimilarItems((sims as any) as (Movie | TVShow)[]);
+        }
+        return;
+      } catch (e: any) {
+        const msg = String(e?.message || "");
+        if (msg.includes("TMDB_API_KEY") || msg.toLowerCase().includes("tmdb") && msg.toLowerCase().includes("missing")) {
+          setMissingKey(true);
+          const mockData = isMovie ? mod.mockMovies : mod.mockTVShows;
+          const foundItem = mockData.find((m: any) => m.id === id);
+          if (foundItem) {
+            setItem(foundItem);
+            setSimilarItems(mockData.filter((m: any) => m.id !== id));
+          } else {
+            setError("TMDB key required for this content");
+          }
+        } else {
+          throw e;
+        }
       }
-
     } catch (err) {
       setError("Failed to load details. Please try again.");
-      console.error("Error loading details:", err);
     } finally {
       setLoading(false);
     }
@@ -176,6 +197,16 @@ export default function DetailsScreen() {
           message={error || "Content not found"}
           onRetry={loadItemDetails}
         />
+        {missingKey && (
+          <View className="px-4 mt-4">
+            <ActionButton
+              title="Open Settings"
+              icon="settings"
+              onPress={() => { try { (navigation as any).navigate("Settings"); } catch {} }}
+              variant="primary"
+            />
+          </View>
+        )}
       </SafeAreaView>
     );
   }
@@ -196,6 +227,14 @@ export default function DetailsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-black" edges={["bottom"]}>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        {missingKey && (
+          <View className="mx-4 mt-3 mb-2 px-4 py-2 bg-yellow-900/30 border border-yellow-700/50 rounded-lg">
+            <Text className="text-yellow-300 text-sm">TMDB key not set. Open Settings to enable real details.</Text>
+            <Pressable onPress={() => { try { (navigation as any).navigate("Settings"); } catch {} }} className="mt-2 self-start px-3 py-1 rounded-full bg-yellow-700/30" style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
+              <Text className="text-yellow-200 text-xs font-medium">Open Settings</Text>
+            </Pressable>
+          </View>
+        )}
         {/* Hero Section */}
         <View className="relative">
           {backdropUrl ? (
