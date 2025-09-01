@@ -178,18 +178,14 @@ const useSettingsStore = create<SettingsState>()(
         if (!iptv.serverUrl || !iptv.username || !iptv.password) return false;
         
         try {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          const isConnected = Math.random() > 0.3;
-          
-          set({ 
-            iptv: { ...iptv, isConnected } 
-          });
-          
+          const iptvService = (await import("../api/iptv")).default;
+          iptvService.setCredentials(iptv.serverUrl, iptv.username, iptv.password);
+          const info = await iptvService.getUserInfo();
+          const isConnected = (info as any)?.auth === 1 || (info as any)?.status === "Active";
+          set({ iptv: { ...iptv, isConnected } });
           return isConnected;
         } catch (error) {
-          set({ 
-            iptv: { ...iptv, isConnected: false } 
-          });
+          set({ iptv: { ...iptv, isConnected: false } });
           return false;
         }
       },

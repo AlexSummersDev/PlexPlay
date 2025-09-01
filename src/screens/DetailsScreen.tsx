@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, Image, Dimensions, Pressable } from "react-native";
+import TrailerModal from "../components/TrailerModal";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -24,6 +25,9 @@ export default function DetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [similarItems, setSimilarItems] = useState<(Movie | TVShow)[]>([]);
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [trailerKey, setTrailerKey] = useState<string | undefined>(undefined);
+  const [iptvVodStream, setIptvVodStream] = useState<{ type: "movie" | "tv"; id: number } | null>(null);
 
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useMediaStore();
 
@@ -39,16 +43,13 @@ export default function DetailsScreen() {
       setLoading(true);
       setError(null);
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      // For demo purposes, find item in mock data
       const mockData = isMovie ? mockMovies : mockTVShows;
       const foundItem = mockData.find(item => item.id === id);
 
       if (foundItem) {
         setItem(foundItem);
-        // Set similar items (just use the same mock data for demo)
         setSimilarItems(mockData.filter(item => item.id !== id));
       } else {
         setError("Content not found");
@@ -81,14 +82,71 @@ export default function DetailsScreen() {
     }
   };
 
-  const handleStreamPress = () => {
-    // In a real app, this would check IPTV availability and start streaming
-    console.log("Stream pressed for:", item);
+  const handleStreamPress = async () => {
+    // Try IPTV VOD if connected and available
+    try {
+      const iptv = (await import("../state/settingsStore")).default.getState().iptv;
+      if (iptv.isConnected && item) {
+        const svc = (await import("../api/iptv")).default;
+        svc.setCredentials(iptv.serverUrl, iptv.username, iptv.password);
+        const title = isMovie ? (item as Movie).title : (item as TVShow).name;
+        const year = isMovie ? ((item as Movie).release_date ? new Date((item as Movie).release_date).getFullYear() : undefined) : undefined;
+        const match = await svc.findVodMatchByTitle(title, year);
+        if (match) {
+          setIptvVodStream({ type: isMovie ? "movie" : "tv", id: match.stream_id });
+          // Navigate to LiveTV player with constructed URL (simplified: reuse Live player)
+          const nav: any = navigation;
+          nav.navigate("LiveTV", { screen: "Player", params: { channelId: String(match.stream_id) } });
+          return;
+        }
+      }
+    } catch {}
+    // Fallback: no IPTV match - could open external trailer or show message
   };
 
-  const handleDownloadPress = () => {
-    // In a real app, this would trigger Radarr/Sonarr download
-    console.log("Download pressed for:", item);
+  const handleDownloadPress = async () => {
+    if (!item) return;
+    try {
+      const { downloads } = (await import("../state/settingsStore")).default.getState();
+      if (isMovie) {
+        const radarr = (await import("../api/radarr")).default;
+        if (!downloads.radarr.serverUrl || !downloads.radarr.apiKey || !downloads.radarr.rootFolder || !downloads.radarr.qualityProfile) {
+          console.log("Radarr not fully configured");
+          return;
+        }
+        const m = item as Movie;
+        await radarr.addMovieFromTMDB(
+          m.id,
+          m.title,
+          m.release_date ? new Date(m.release_date).getFullYear() : new Date().getFullYear(),
+          1,
+          downloads.radarr.rootFolder,
+          true,
+          true
+        );
+      } else {
+        const sonarr = (await import("../api/sonarr")).default;
+        const svc = new (await import("../api/tmdb")).ExtendedTMDBService();
+        const tv = item as TVShow;
+        const external = await svc.getTVExternalIds(tv.id);
+        if (!downloads.sonarr.serverUrl || !downloads.sonarr.apiKey || !downloads.sonarr.rootFolder || !downloads.sonarr.qualityProfile) {
+          console.log("Sonarr not fully configured");
+          return;
+        }
+        if (external.tvdb_id) {
+          await sonarr.addSeriesFromTVDB(
+            external.tvdb_id,
+            tv.name,
+            1,
+            downloads.sonarr.rootFolder,
+            true,
+            true
+          );
+        }
+      }
+    } catch (e) {
+      console.log("Download action failed", e);
+    }
   };
 
   const handleSimilarItemPress = (similarItem: Movie | TVShow) => {
@@ -247,6 +305,26 @@ export default function DetailsScreen() {
               className="flex-1 mr-2"
             />
             <ActionButton
+              title="Trailer"
+              icon="film"
+              onPress={async () => {
+                try {
+                  if (isMovie) {
+                    const vids = await (await import("../api/tmdb")).default.getMovieVideos(id);
+                    const yt = vids.results?.find(v => v.site === "YouTube" && (v.type === "Trailer" || v.type === "Teaser"));
+                    setTrailerKey(yt?.key);
+                  } else {
+                    const vids = await (await import("../api/tmdb")).default.getTVShowVideos(id);
+                    const yt = vids.results?.find(v => v.site === "YouTube" && (v.type === "Trailer" || v.type === "Teaser"));
+                    setTrailerKey(yt?.key);
+                  }
+                } catch {}
+                setShowTrailer(true);
+              }}
+              variant="secondary"
+              className="flex-1 mx-2"
+            />
+            <ActionButton
               title="Download"
               icon="download"
               onPress={handleDownloadPress}
@@ -254,6 +332,14 @@ export default function DetailsScreen() {
               className="flex-1 ml-2"
             />
           </View>
+
+          {/* Trailer Modal */}
+          <TrailerModal
+            visible={showTrailer}
+            youTubeKey={trailerKey}
+            title={isMovie ? (item as Movie).title : (item as TVShow).name}
+            onClose={() => setShowTrailer(false)}
+          />
 
           {/* Synopsis */}
           <View className="mb-6">

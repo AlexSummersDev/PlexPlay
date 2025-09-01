@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Pressable, Dimensions, StatusBar } from "react-native";
+import { Video, ResizeMode } from "expo-av";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { LiveTVStackParamList } from "../types/navigation";
-// import useSettingsStore from "../state/settingsStore";
+import useSettingsStore from "../state/settingsStore";
 import { ActionButton } from "../components";
 import iptvService from "../api/iptv";
 
@@ -17,11 +18,12 @@ export default function LiveTVPlayerScreen() {
   const navigation = useNavigation();
   const { channelId } = route.params;
 
-  // const { iptv } = useSettingsStore();
+  const { iptv } = useSettingsStore();
   const [showControls, setShowControls] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(50);
   const [channelInfo, setChannelInfo] = useState<any>(null);
+  const [streamUrl, setStreamUrl] = useState<string | null>(null);
 
   useEffect(() => {
     loadChannelInfo();
@@ -36,15 +38,23 @@ export default function LiveTVPlayerScreen() {
 
   const loadChannelInfo = async () => {
     try {
-      // For demo purposes, use mock data
-      const mockChannels = iptvService.getMockChannels();
-      const channel = mockChannels.find(ch => ch.stream_id.toString() === channelId);
+      iptvService.setCredentials(iptv.serverUrl, iptv.username, iptv.password);
+      let channel = null as any;
+      try {
+        const channels = await iptvService.getLiveTVChannels();
+        channel = channels.find(ch => ch.stream_id.toString() === channelId);
+      } catch (e) {
+        const mockChannels = iptvService.getMockChannels();
+        channel = mockChannels.find(ch => ch.stream_id.toString() === channelId);
+      }
       setChannelInfo(channel);
-      
-      // Simulate starting playback
+      if (channel) {
+        const url = iptvService.getLiveStreamUrl(channel.stream_id, channel.container_extension || "m3u8");
+        setStreamUrl(url);
+      }
       setTimeout(() => {
         setIsPlaying(true);
-      }, 1000);
+      }, 500);
     } catch (error) {
       console.error("Error loading channel info:", error);
     }
@@ -77,18 +87,18 @@ export default function LiveTVPlayerScreen() {
         className="flex-1 items-center justify-center"
         style={{ width: screenWidth, height: screenHeight }}
       >
-        {/* Simulated Video Player */}
+        {/* Video Player */}
         <View className="flex-1 w-full bg-gray-900 items-center justify-center">
-          {isPlaying ? (
-            <View className="items-center">
-              <Ionicons name="tv" size={64} color="#60A5FA" />
-              <Text className="text-white text-lg font-semibold mt-4">
-                {channelInfo?.name || "Live TV"}
-              </Text>
-              <Text className="text-gray-400 text-sm mt-1">
-                Streaming live...
-              </Text>
-            </View>
+          {streamUrl ? (
+            // @ts-ignore - expo-av supports className
+            <Video
+              source={{ uri: streamUrl }}
+              style={{ width: screenWidth, height: screenHeight }}
+              useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
+              shouldPlay={isPlaying}
+              onError={(e: any) => console.log("Video error", e)}
+            />
           ) : (
             <View className="items-center">
               <Ionicons name="play-circle-outline" size={64} color="#6B7280" />

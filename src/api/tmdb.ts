@@ -4,9 +4,8 @@ import { Movie, TVShow, MediaDetails, TVShowDetails, Credits, Video, Genre } fro
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
 
-// For demo purposes, we'll use a public TMDB API key
-// In production, this should be stored securely
-const TMDB_API_KEY = "your_tmdb_api_key_here"; // Replace with actual key
+// Try to read from env first, fallback to empty string (uses mocks)
+const TMDB_API_KEY = (process.env.EXPO_PUBLIC_TMDB_API_KEY || process.env.TMDB_API_KEY || "");
 
 interface TMDBResponse<T> {
   page: number;
@@ -22,6 +21,10 @@ interface TMDBError {
 
 class TMDBService {
   private async makeRequest<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
+    if (!TMDB_API_KEY) {
+      // @ts-ignore
+      throw new Error("TMDB_API_KEY missing");
+    }
     const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
     url.searchParams.append("api_key", TMDB_API_KEY);
     
@@ -29,19 +32,16 @@ class TMDBService {
       url.searchParams.append(key, value);
     });
 
-    try {
-      const response = await fetch(url.toString());
-      
-      if (!response.ok) {
+    const response = await fetch(url.toString());
+    if (!response.ok) {
+      try {
         const error: TMDBError = await response.json();
         throw new Error(`TMDB API Error: ${error.status_message}`);
+      } catch {
+        throw new Error(`TMDB API Error: ${response.status} ${response.statusText}`);
       }
-      
-      return await response.json();
-    } catch (error) {
-      console.error("TMDB API request failed:", error);
-      throw error;
     }
+    return await response.json();
   }
 
   // Movie endpoints
@@ -146,6 +146,45 @@ class TMDBService {
   getBackdropUrl(path: string | null, size: "w300" | "w780" | "w1280" | "original" = "w1280"): string | null {
     if (!path) return null;
     return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
+  }
+}
+
+// Providers & Discover additions
+export type WatchProvider = { display_priority: number; logo_path: string; provider_id: number; provider_name: string };
+
+export class ExtendedTMDBService extends TMDBService {
+  async getWatchProvidersMovieList(region: string = "US"): Promise<{ results: WatchProvider[] }> {
+    return this["makeRequest"]<{ results: WatchProvider[] }>("/watch/providers/movie", { watch_region: region });
+  }
+  async getWatchProvidersTVList(region: string = "US"): Promise<{ results: WatchProvider[] }> {
+    return this["makeRequest"]<{ results: WatchProvider[] }>("/watch/providers/tv", { watch_region: region });
+  }
+  async discoverMoviesByProviders(providerIds: number[] = [], region: string = "US", page: number = 1) {
+    const params: Record<string, string> = {
+      with_watch_providers: providerIds.join("|"),
+      watch_region: region,
+      with_watch_monetization_types: "flatrate|free|ads|rent|buy",
+      page: page.toString(),
+    };
+    return this["makeRequest"]<TMDBResponse<Movie>>("/discover/movie", params);
+  }
+  async discoverTVByProviders(providerIds: number[] = [], region: string = "US", page: number = 1) {
+    const params: Record<string, string> = {
+      with_watch_providers: providerIds.join("|"),
+      watch_region: region,
+      with_watch_monetization_types: "flatrate|free|ads|rent|buy",
+      page: page.toString(),
+    };
+    return this["makeRequest"]<TMDBResponse<TVShow>>("/discover/tv", params);
+  }
+  async getMovieWatchProviders(movieId: number) {
+    return this["makeRequest"]<{ results: any }>(`/movie/${movieId}/watch/providers`);
+  }
+  async getTVWatchProviders(tvId: number) {
+    return this["makeRequest"]<{ results: any }>(`/tv/${tvId}/watch/providers`);
+  }
+  async getTVExternalIds(tvId: number) {
+    return this["makeRequest"]<{ id: number; imdb_id: string | null; freebase_mid: string | null; freebase_id: string | null; tvdb_id: number | null; tvrage_id: number | null }>(`/tv/${tvId}/external_ids`);
   }
 }
 

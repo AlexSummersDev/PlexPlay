@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView, RefreshControl } from "react-native";
+import { ScrollView, RefreshControl, Pressable, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -141,8 +141,17 @@ export default function HomeScreen() {
         onChangeText={setSearchQuery}
         onSubmit={handleSearchSubmit}
         onFocus={handleSearchFocus}
-        className="mb-6"
+        className="mb-4"
       />
+
+      <Pressable
+        onPress={() => navigation.navigate("Providers")}
+        className="mx-4 mb-4 px-4 py-3 bg-gray-800 rounded-xl"
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+      >
+        <Text className="text-white font-semibold">Browse by Service</Text>
+        <Text className="text-gray-400 text-xs mt-1">Disney+, Netflix, Paramount+, and more</Text>
+      </Pressable>
       
       <ScrollView 
         className="flex-1"

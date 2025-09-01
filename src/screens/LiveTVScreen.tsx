@@ -113,17 +113,24 @@ export default function LiveTVScreen() {
       setLoading(true);
       setError(null);
 
-      // For demo purposes, use mock data
-      // In production, you would use:
-      // const channelsData = await iptvService.getLiveTVChannels();
+      // Configure service with current credentials
+      iptvService.setCredentials(iptv.serverUrl, iptv.username, iptv.password);
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let channelsData: IPTVChannel[] = [];
+      let categoriesData: { category_name: string }[] = [];
 
-      const mockChannels = iptvService.getMockChannels();
-      const mockCategories = iptvService.getMockCategories();
+      try {
+        const cats = await iptvService.getLiveTVCategories();
+        categoriesData = cats as any;
+        channelsData = await iptvService.getLiveTVChannels();
+      } catch (e) {
+        // Fallback to mock data if provider fails
+        channelsData = iptvService.getMockChannels() as any;
+        categoriesData = iptvService.getMockCategories() as any;
+      }
 
-      setChannels(mockChannels);
-      setCategories(["All", ...mockCategories.map(cat => cat.category_name)]);
+      setChannels(channelsData);
+      setCategories(["All", ...categoriesData.map((cat: any) => cat.category_name)]);
 
     } catch (err) {
       setError("Failed to load channels. Please check your IPTV connection.");

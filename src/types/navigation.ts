@@ -10,6 +10,7 @@ export type MoviesStackParamList = {
   Search: { query?: string; type?: "movie" | "tv" };
   Details: { id: number; type: "movie" | "tv" };
   PlexIntegration: undefined;
+  Providers: undefined;
 };
 
 export type TVShowsStackParamList = {

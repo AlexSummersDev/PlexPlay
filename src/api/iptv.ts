@@ -131,7 +131,7 @@ class IPTVService {
     return this.makeRequest<IPTVCategory[]>("get_vod_categories");
   }
 
-  // Get VOD streams
+  // Get VOD streams (movies)
   async getVODStreams(categoryId?: string): Promise<IPTVChannel[]> {
     const params: Record<string, string> = {};
     if (categoryId) {
@@ -140,6 +140,19 @@ class IPTVService {
     return this.makeRequest<IPTVChannel[]>("get_vod_streams", params);
   }
 
+  // Simple match by title and optional year
+  async findVodMatchByTitle(title: string, year?: number): Promise<IPTVChannel | null> {
+    try {
+      const vod = await this.getVODStreams();
+      const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "").trim();
+      const target = norm(title + (year ? year.toString() : ""));
+      const found = vod.find(v => norm(v.name).includes(norm(title)) || norm(v.name).includes(target));
+      return found || null;
+    } catch {
+      return null;
+    }
+  }
+ 
   // Get series categories
   async getSeriesCategories(): Promise<IPTVCategory[]> {
     return this.makeRequest<IPTVCategory[]>("get_series_categories");
