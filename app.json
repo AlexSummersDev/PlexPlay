@@ -8,7 +8,20 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vibecode.app",
+      "appClip": {
+        "bundleIdentifier": "com.vibecode.app.Clip",
+        "name": "Vibecode Clip",
+        "requestsLocationConfirmation": true,
+        "parentApplicationIdentifiers": ["com.vibecode.app"],
+        "associatedDomains": ["appclips:vibecode.app"],
+        "entitlements": {
+          "com.apple.developer.on-demand-install-capable": true,
+          "com.apple.developer.parent-application-identifiers": ["com.vibecode.app"],
+          "com.apple.developer.associated-domains": ["appclips:vibecode.app"]
+        }
+      }
     },
     "android": {
       "edgeToEdgeEnabled": true

@@ -1,8 +1,12 @@
+import React from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { View, Text } from "react-native";
 import TabNavigator from "./src/navigation/TabNavigator";
+import AppClipEntry from "./src/components/AppClipEntry";
+import { useAppClip } from "./src/hooks/useAppClip";
 
 /*
 IMPORTANT NOTICE: DO NOT REMOVE
@@ -26,6 +30,32 @@ const openai_api_key = Constants.expoConfig.extra.apikey;
 */
 
 export default function App() {
+  const { isClip, isLoading } = useAppClip();
+
+  // Show loading while detecting App Clip status
+  if (isLoading) {
+    return (
+      <GestureHandlerRootView className="flex-1">
+        <SafeAreaProvider>
+          <View className="flex-1 justify-center items-center bg-white">
+            <Text className="text-lg text-gray-600">Loading...</Text>
+          </View>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    );
+  }
+
+  // Render App Clip experience
+  if (isClip) {
+    return (
+      <GestureHandlerRootView className="flex-1">
+        <AppClipEntry />
+        <StatusBar style="dark" />
+      </GestureHandlerRootView>
+    );
+  }
+
+  // Render full app experience
   return (
     <GestureHandlerRootView className="flex-1">
       <SafeAreaProvider>
