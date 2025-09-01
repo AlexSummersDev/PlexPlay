@@ -1,5 +1,14 @@
 // Radarr API Service for movie downloads
 
+export type RadarrLookupCard = {
+  id?: number;
+  title: string;
+  year?: number;
+  overview?: string;
+  imageUrl?: string;
+  tmdbId?: number;
+};
+
 interface RadarrMovie {
   id: number;
   title: string;
@@ -187,6 +196,18 @@ class RadarrService {
   // Search for movie
   async searchMovie(term: string): Promise<RadarrMovie[]> {
     return this.makeRequest<RadarrMovie[]>(`/movie/lookup?term=${encodeURIComponent(term)}`);
+  }
+
+  mapLookupToCard(item: Partial<RadarrMovie>): RadarrLookupCard {
+    const img = Array.isArray(item.images) ? item.images.find((i: any) => i.coverType === "poster") : undefined;
+    return {
+      id: item.id,
+      title: item.title || "",
+      year: item.year,
+      overview: item.overview,
+      imageUrl: (img?.remoteUrl || img?.url || "") as string,
+      tmdbId: item.tmdbId,
+    };
   }
 
   // Get quality profiles

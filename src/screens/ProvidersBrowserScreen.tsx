@@ -1,130 +1,180 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, FlatList, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { HorizontalCarousel, LoadingSpinner, ErrorState } from "../components";
-import { ExtendedTMDBService, mockMovies, mockTVShows } from "../api/tmdb";
-
-const PROVIDERS: { id: number; name: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { id: 337, name: "Disney+", icon: "logo-disney" as any },
-  { id: 8, name: "Netflix", icon: "logo-netflix" as any },
-  { id: 9, name: "Prime Video", icon: "logo-amazon" as any },
-  { id: 531, name: "Paramount+", icon: "film-outline" },
-  { id: 384, name: "Max", icon: "videocam-outline" },
-  { id: 15, name: "Hulu", icon: "tv-outline" },
-];
+import SearchBar from "../components/SearchBar";
+import IndexerCard from "../components/IndexerCard";
+import IndexerDetailsModal from "../components/IndexerDetailsModal";
+import radarrService from "../api/radarr";
+import sonarrService from "../api/sonarr";
+import useSettingsStore from "../state/settingsStore";
+import { ActionButton, ErrorState, LoadingSpinner } from "../components";
 
 export default function ProvidersBrowserScreen() {
-  const [selectedProviderIds, setSelectedProviderIds] = useState<number[]>([337]);
-  const navigation = useNavigation<any>();
-  const [region, setRegion] = useState("US");
+  const { downloads } = useSettingsStore();
+  const [mode, setMode] = useState<"movie" | "tv">("movie");
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [fallbackUsed, setFallbackUsed] = useState(false);
+  const [results, setResults] = useState<any[]>([]);
 
-  const [movies, setMovies] = useState<any[]>([]);
-  const [shows, setShows] = useState<any[]>([]);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selected, setSelected] = useState<any | null>(null);
 
-  const load = async () => {
+  const configured = useMemo(() => ({
+    radarr: !!(downloads.radarr.serverUrl && downloads.radarr.apiKey),
+    sonarr: !!(downloads.sonarr.serverUrl && downloads.sonarr.apiKey),
+  }), [downloads]);
+
+  // Debounced search
+  useEffect(() => {
+    const t = setTimeout(() => {
+      (async () => {
+        const q = query.trim();
+        if (q.length < 2) {
+          setResults([]);
+          setError(null);
+          return;
+        }
+        try {
+          setLoading(true);
+          setError(null);
+          if (mode === "movie") {
+            if (!configured.radarr) {
+              setError("Radarr not configured. Open Download Settings.")
+              setResults([]);
+              return;
+            }
+            radarrService.setCredentials(downloads.radarr.serverUrl, downloads.radarr.apiKey);
+            const list = await radarrService.searchMovie(q);
+            const mapped = list.map((m: any) => (radarrService as any).mapLookupToCard(m));
+            setResults(mapped);
+          } else {
+            if (!configured.sonarr) {
+              setError("Sonarr not configured. Open Download Settings.");
+              setResults([]);
+              return;
+            }
+            sonarrService.setCredentials(downloads.sonarr.serverUrl, downloads.sonarr.apiKey);
+            const list = await sonarrService.searchSeries(q);
+            const mapped = list.map((s: any) => (sonarrService as any).mapLookupToCard(s));
+            setResults(mapped);
+          }
+        } catch (e) {
+          setError("Indexer search failed. Please verify settings and try again.");
+          setResults([]);
+        } finally {
+          setLoading(false);
+        }
+      })();
+    }, 300);
+    return () => clearTimeout(t);
+  }, [query, mode, configured]);
+
+  const handleOpen = (item: any) => {
+    setSelected(item);
+    setDetailsOpen(true);
+  };
+
+  const canAdd = useMemo(() => {
+    if (mode === "movie") {
+      return configured.radarr && !!downloads.radarr.qualityProfileId && !!(downloads.radarr.rootFolderPath || downloads.radarr.rootFolder);
+    }
+    return configured.sonarr && !!downloads.sonarr.qualityProfileId && !!(downloads.sonarr.rootFolderPath || downloads.sonarr.rootFolder);
+  }, [mode, configured, downloads]);
+
+  const handleAdd = async () => {
+    if (!selected) return;
     try {
       setLoading(true);
-      setError(null);
-
-      // Use extended service when API key exists; otherwise fallback to existing mock
-      // @ts-ignore access env decision via tmdbService private
-      const svc = new ExtendedTMDBService();
-      const [m, t] = await Promise.all([
-        svc.discoverMoviesByProviders(selectedProviderIds, region, 1),
-        svc.discoverTVByProviders(selectedProviderIds, region, 1),
-      ]);
-      setMovies(m.results || []);
-      setShows(t.results || []);
+      if (mode === "movie") {
+        const qid = downloads.radarr.qualityProfileId;
+        const root = downloads.radarr.rootFolderPath || downloads.radarr.rootFolder;
+        radarrService.setCredentials(downloads.radarr.serverUrl, downloads.radarr.apiKey);
+        await radarrService.addMovieFromTMDB(selected.tmdbId, selected.title, selected.year || new Date().getFullYear(), qid, root, true, true);
+      } else {
+        const qid = downloads.sonarr.qualityProfileId;
+        const root = downloads.sonarr.rootFolderPath || downloads.sonarr.rootFolder;
+        sonarrService.setCredentials(downloads.sonarr.serverUrl, downloads.sonarr.apiKey);
+        await sonarrService.addSeriesFromTVDB(selected.tvdbId, selected.name || selected.title, qid, root, true, true);
+      }
+      setDetailsOpen(false);
     } catch (e) {
-      // Fallback to mocks with a helpful banner
-      setError(null);
-      setFallbackUsed(true);
-      setMovies(mockMovies);
-      setShows(mockTVShows);
+      setError("Add request failed. Check defaults in Download Settings.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    load();
-  }, [selectedProviderIds.join(","), region]);
-
-  const toggleProvider = (id: number) => {
-    setSelectedProviderIds((prev) => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  };
+  if ((mode === "movie" && !configured.radarr) || (mode === "tv" && !configured.sonarr)) {
+    return (
+      <SafeAreaView className="flex-1 bg-black">
+        <View className="px-4 pt-2">
+          <Text className="text-white text-2xl font-bold mb-3">Browse Indexers</Text>
+        </View>
+        <ErrorState fullScreen={false} message={mode === "movie" ? "Radarr not configured." : "Sonarr not configured."} onRetry={() => {}} />
+        <View className="px-4 mt-2">
+          <ActionButton title="Open Download Settings" icon="settings" onPress={() => {}} variant="primary" fullWidth />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <View className="px-4 pt-2">
-        <Text className="text-white text-2xl font-bold mb-3">Browse by Service</Text>
-
-        {fallbackUsed && (
-          <View className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 mb-3">
-            <Text className="text-blue-200 text-sm mb-2">Showing demo data. Add a TMDB API key to see live results.</Text>
-            <Pressable
-              onPress={() => navigation.navigate("Settings")}
-              className="self-start bg-blue-600 rounded-lg px-3 py-1"
-              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-            >
-              <Text className="text-white text-sm">Open Settings</Text>
-            </Pressable>
-          </View>
-        )}
-
-        <FlatList
-          data={PROVIDERS}
-          keyExtractor={(i) => i.id.toString()}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <Pressable
-              onPress={() => toggleProvider(item.id)}
-              className={`px-4 py-2 rounded-full mr-3 ${selectedProviderIds.includes(item.id) ? "bg-blue-600" : "bg-gray-700"}`}
-              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-            >
-              <Text className={`text-sm font-medium ${selectedProviderIds.includes(item.id) ? "text-white" : "text-gray-300"}`}>
-                {item.name}
-              </Text>
-            </Pressable>
-          )}
-        />
+      <View className="pt-2">
+        <Text className="text-white text-2xl font-bold mb-3 px-4">Browse Indexers</Text>
+        <View className="flex-row px-4 mb-3">
+          <Pressable onPress={() => setMode("movie")} className={`px-4 py-2 rounded-full mr-2 ${mode === "movie" ? "bg-blue-600" : "bg-gray-700"}`} style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
+            <Text className={`text-sm font-medium ${mode === "movie" ? "text-white" : "text-gray-300"}`}>Movies</Text>
+          </Pressable>
+          <Pressable onPress={() => setMode("tv")} className={`px-4 py-2 rounded-full ${mode === "tv" ? "bg-blue-600" : "bg-gray-700"}`} style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
+            <Text className={`text-sm font-medium ${mode === "tv" ? "text-white" : "text-gray-300"}`}>TV</Text>
+          </Pressable>
+        </View>
+        <SearchBar value={query} onChangeText={setQuery} placeholder={`Search ${mode === "movie" ? "movies" : "TV shows"}...`} />
       </View>
 
-      {loading ? (
-        <LoadingSpinner fullScreen message="Loading services..." />
-      ) : error ? (
-        <ErrorState fullScreen={false} message={error} onRetry={load} />
-      ) : (
-        <FlatList
-          data={[{ key: "movies" }, { key: "shows" }]}
-          keyExtractor={(i) => i.key}
-          renderItem={({ item }) => (
-            <View className="mt-4">
-              {item.key === "movies" ? (
-                <HorizontalCarousel
-                  title="Movies"
-                  data={movies}
-                  onItemPress={() => {}}
-                  showRating
-                />
-              ) : (
-                <HorizontalCarousel
-                  title="TV Shows"
-                  data={shows}
-                  onItemPress={() => {}}
-                  showRating
-                />
-              )}
-            </View>
-          )}
-        />
+      {loading && <LoadingSpinner fullScreen message="Searching..." />}
+
+      {!loading && results.length === 0 && !error && (
+        <View className="px-4 mt-6">
+          <Text className="text-gray-400">Type at least 2 characters to search your indexers.</Text>
+        </View>
       )}
+
+      {!!error && !loading && (
+        <View className="px-4 mt-4">
+          <Text className="text-red-400 text-sm">{error}</Text>
+        </View>
+      )}
+
+      <FlatList
+        data={results}
+        keyExtractor={(_, i) => String(i)}
+        numColumns={3}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12 }}
+        columnWrapperStyle={{ justifyContent: "flex-start" }}
+        renderItem={({ item }) => (
+          <IndexerCard
+            title={item.title || item.name}
+            subtitle={item.year ? String(item.year) : undefined}
+            imageUrl={item.imageUrl}
+            onPress={() => handleOpen(item)}
+            size="medium"
+            className="mb-4"
+          />
+        )}
+      />
+
+      <IndexerDetailsModal
+        visible={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        kind={mode}
+        data={selected || {}}
+        onPrimary={canAdd ? handleAdd : undefined}
+        primaryDisabled={!canAdd}
+        primaryTitle={!canAdd ? "Configure defaults in Download Settings" : undefined}
+      />
     </SafeAreaView>
   );
 }

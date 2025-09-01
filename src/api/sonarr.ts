@@ -1,5 +1,14 @@
 // Sonarr API Service for TV show downloads
 
+export type SonarrLookupCard = {
+  id?: number;
+  name: string;
+  year?: number;
+  overview?: string;
+  imageUrl?: string;
+  tvdbId?: number;
+};
+
 interface SonarrSeries {
   id: number;
   title: string;
@@ -217,6 +226,18 @@ class SonarrService {
   // Search for series
   async searchSeries(term: string): Promise<SonarrSeries[]> {
     return this.makeRequest<SonarrSeries[]>(`/series/lookup?term=${encodeURIComponent(term)}`);
+  }
+
+  mapLookupToCard(item: Partial<SonarrSeries>): SonarrLookupCard {
+    const img = Array.isArray(item.images) ? item.images.find((i: any) => i.coverType === "poster") : undefined;
+    return {
+      id: item.id,
+      name: (item as any).title || "",
+      year: item.year,
+      overview: item.overview,
+      imageUrl: (img?.remoteUrl || img?.url || (item as any).remotePoster || "") as string,
+      tvdbId: item.tvdbId,
+    };
   }
 
   // Get episodes for series
