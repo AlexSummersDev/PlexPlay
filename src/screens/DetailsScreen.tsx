@@ -110,17 +110,20 @@ export default function DetailsScreen() {
       const { downloads } = (await import("../state/settingsStore")).default.getState();
       if (isMovie) {
         const radarr = (await import("../api/radarr")).default;
-        if (!downloads.radarr.serverUrl || !downloads.radarr.apiKey || !downloads.radarr.rootFolder || !downloads.radarr.qualityProfile) {
+        const root = downloads.radarr.rootFolderPath || downloads.radarr.rootFolder;
+        const qid = downloads.radarr.qualityProfileId || 0;
+        if (!downloads.radarr.serverUrl || !downloads.radarr.apiKey || !root || !qid) {
           console.log("Radarr not fully configured");
           return;
         }
+        radarr.setCredentials(downloads.radarr.serverUrl, downloads.radarr.apiKey);
         const m = item as Movie;
         await radarr.addMovieFromTMDB(
           m.id,
           m.title,
           m.release_date ? new Date(m.release_date).getFullYear() : new Date().getFullYear(),
-          1,
-          downloads.radarr.rootFolder,
+          qid,
+          root,
           true,
           true
         );
@@ -129,16 +132,19 @@ export default function DetailsScreen() {
         const svc = new (await import("../api/tmdb")).ExtendedTMDBService();
         const tv = item as TVShow;
         const external = await svc.getTVExternalIds(tv.id);
-        if (!downloads.sonarr.serverUrl || !downloads.sonarr.apiKey || !downloads.sonarr.rootFolder || !downloads.sonarr.qualityProfile) {
+        const root = downloads.sonarr.rootFolderPath || downloads.sonarr.rootFolder;
+        const qid = downloads.sonarr.qualityProfileId || 0;
+        if (!downloads.sonarr.serverUrl || !downloads.sonarr.apiKey || !root || !qid) {
           console.log("Sonarr not fully configured");
           return;
         }
+        sonarr.setCredentials(downloads.sonarr.serverUrl, downloads.sonarr.apiKey);
         if (external.tvdb_id) {
           await sonarr.addSeriesFromTVDB(
             external.tvdb_id,
             tv.name,
-            1,
-            downloads.sonarr.rootFolder,
+            qid,
+            root,
             true,
             true
           );

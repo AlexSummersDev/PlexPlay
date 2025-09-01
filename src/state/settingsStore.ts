@@ -23,22 +23,28 @@ interface IPTVSettings {
 interface DownloadSettings {
   nzbget: {
     serverUrl: string;
-    apiKey: string;
+    username: string;
+    password: string;
+    apiKey: string; // legacy, unused
     isConnected: boolean;
   };
   radarr: {
     serverUrl: string;
     apiKey: string;
     isConnected: boolean;
-    qualityProfile: string;
-    rootFolder: string;
+    qualityProfile: string; // display name (legacy)
+    qualityProfileId: number; // selected profile id
+    rootFolder: string; // display name/path (legacy)
+    rootFolderPath: string; // selected root folder path
   };
   sonarr: {
     serverUrl: string;
     apiKey: string;
     isConnected: boolean;
-    qualityProfile: string;
-    rootFolder: string;
+    qualityProfile: string; // display name (legacy)
+    qualityProfileId: number; // selected profile id
+    rootFolder: string; // display name/path (legacy)
+    rootFolderPath: string; // selected root folder path
   };
 }
 
@@ -96,6 +102,8 @@ const defaultIPTVSettings: IPTVSettings = {
 const defaultDownloadSettings: DownloadSettings = {
   nzbget: {
     serverUrl: "",
+    username: "",
+    password: "",
     apiKey: "",
     isConnected: false,
   },
@@ -104,14 +112,18 @@ const defaultDownloadSettings: DownloadSettings = {
     apiKey: "",
     isConnected: false,
     qualityProfile: "",
+    qualityProfileId: 0,
     rootFolder: "",
+    rootFolderPath: "",
   },
   sonarr: {
     serverUrl: "",
     apiKey: "",
     isConnected: false,
     qualityProfile: "",
+    qualityProfileId: 0,
     rootFolder: "",
+    rootFolderPath: "",
   },
 };
 
@@ -200,26 +212,25 @@ const useSettingsStore = create<SettingsState>()(
       
       testNZBGetConnection: async () => {
         const { downloads } = get();
-        if (!downloads.nzbget.serverUrl || !downloads.nzbget.apiKey) return false;
-        
+        const creds = downloads.nzbget;
+        if (!creds.serverUrl || !creds.username || !creds.password) return false;
         try {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          const isConnected = Math.random() > 0.3;
-          
-          set({ 
-            downloads: { 
-              ...downloads, 
-              nzbget: { ...downloads.nzbget, isConnected } 
-            } 
+          const svc = (await import("../api/nzbget")).default;
+          svc.setCredentials(creds.serverUrl, creds.username, creds.password);
+          await svc.getVersion();
+          set({
+            downloads: {
+              ...downloads,
+              nzbget: { ...downloads.nzbget, isConnected: true },
+            },
           });
-          
-          return isConnected;
+          return true;
         } catch (error) {
-          set({ 
-            downloads: { 
-              ...downloads, 
-              nzbget: { ...downloads.nzbget, isConnected: false } 
-            } 
+          set({
+            downloads: {
+              ...downloads,
+              nzbget: { ...downloads.nzbget, isConnected: false },
+            },
           });
           return false;
         }
@@ -227,26 +238,25 @@ const useSettingsStore = create<SettingsState>()(
       
       testRadarrConnection: async () => {
         const { downloads } = get();
-        if (!downloads.radarr.serverUrl || !downloads.radarr.apiKey) return false;
-        
+        const creds = downloads.radarr;
+        if (!creds.serverUrl || !creds.apiKey) return false;
         try {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          const isConnected = Math.random() > 0.3;
-          
-          set({ 
-            downloads: { 
-              ...downloads, 
-              radarr: { ...downloads.radarr, isConnected } 
-            } 
+          const svc = (await import("../api/radarr")).default;
+          svc.setCredentials(creds.serverUrl, creds.apiKey);
+          const ok = await svc.testConnection();
+          set({
+            downloads: {
+              ...downloads,
+              radarr: { ...downloads.radarr, isConnected: ok },
+            },
           });
-          
-          return isConnected;
+          return ok;
         } catch (error) {
-          set({ 
-            downloads: { 
-              ...downloads, 
-              radarr: { ...downloads.radarr, isConnected: false } 
-            } 
+          set({
+            downloads: {
+              ...downloads,
+              radarr: { ...downloads.radarr, isConnected: false },
+            },
           });
           return false;
         }
@@ -254,26 +264,25 @@ const useSettingsStore = create<SettingsState>()(
       
       testSonarrConnection: async () => {
         const { downloads } = get();
-        if (!downloads.sonarr.serverUrl || !downloads.sonarr.apiKey) return false;
-        
+        const creds = downloads.sonarr;
+        if (!creds.serverUrl || !creds.apiKey) return false;
         try {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          const isConnected = Math.random() > 0.3;
-          
-          set({ 
-            downloads: { 
-              ...downloads, 
-              sonarr: { ...downloads.sonarr, isConnected } 
-            } 
+          const svc = (await import("../api/sonarr")).default;
+          svc.setCredentials(creds.serverUrl, creds.apiKey);
+          const ok = await svc.testConnection();
+          set({
+            downloads: {
+              ...downloads,
+              sonarr: { ...downloads.sonarr, isConnected: ok },
+            },
           });
-          
-          return isConnected;
+          return ok;
         } catch (error) {
-          set({ 
-            downloads: { 
-              ...downloads, 
-              sonarr: { ...downloads.sonarr, isConnected: false } 
-            } 
+          set({
+            downloads: {
+              ...downloads,
+              sonarr: { ...downloads.sonarr, isConnected: false },
+            },
           });
           return false;
         }

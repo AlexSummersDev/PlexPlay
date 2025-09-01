@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TextInput, Alert, Pressable } from "react-native";
+import { View, Text, ScrollView, TextInput, Pressable, Modal, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import useSettingsStore from "../state/settingsStore";
@@ -13,9 +13,15 @@ interface ServiceConfigProps {
   service: ServiceType;
   isConnected: boolean;
   serverUrl: string;
-  apiKey: string;
   onServerUrlChange: (url: string) => void;
-  onApiKeyChange: (key: string) => void;
+  // API key (Radarr/Sonarr)
+  apiKey?: string;
+  onApiKeyChange?: (key: string) => void;
+  // Username/password (NZBGet)
+  username?: string;
+  password?: string;
+  onUsernameChange?: (v: string) => void;
+  onPasswordChange?: (v: string) => void;
   onTest: () => void;
   testing: boolean;
   additionalFields?: React.ReactNode;
@@ -28,8 +34,12 @@ function ServiceConfig({
   isConnected,
   serverUrl,
   apiKey,
+  username,
+  password,
   onServerUrlChange,
   onApiKeyChange,
+  onUsernameChange,
+  onPasswordChange,
   onTest,
   testing,
   additionalFields,
@@ -89,21 +99,55 @@ function ServiceConfig({
             />
           </View>
 
-          <View className="mb-4">
-            <Text className="text-gray-300 text-sm font-medium mb-2">
-              API Key *
-            </Text>
-            <TextInput
-              className="bg-gray-800 text-white p-3 rounded-lg text-base"
-              placeholder="Your API key"
-              placeholderTextColor="#6B7280"
-              value={apiKey}
-              onChangeText={onApiKeyChange}
-              autoCapitalize="none"
-              autoCorrect={false}
-              secureTextEntry
-            />
-          </View>
+          {service === "nzbget" ? (
+            <>
+              <View className="mb-4">
+                <Text className="text-gray-300 text-sm font-medium mb-2">
+                  Username *
+                </Text>
+                <TextInput
+                  className="bg-gray-800 text-white p-3 rounded-lg text-base"
+                  placeholder="nzbget"
+                  placeholderTextColor="#6B7280"
+                  value={typeof username === "string" ? username : ""}
+                  onChangeText={onUsernameChange as any}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+              <View className="mb-4">
+                <Text className="text-gray-300 text-sm font-medium mb-2">
+                  Password *
+                </Text>
+                <TextInput
+                  className="bg-gray-800 text-white p-3 rounded-lg text-base"
+                  placeholder="Your NZBGet password"
+                  placeholderTextColor="#6B7280"
+                  value={typeof password === "string" ? password : ""}
+                  onChangeText={onPasswordChange as any}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  secureTextEntry
+                />
+              </View>
+            </>
+          ) : (
+            <View className="mb-4">
+              <Text className="text-gray-300 text-sm font-medium mb-2">
+                API Key *
+              </Text>
+              <TextInput
+                className="bg-gray-800 text-white p-3 rounded-lg text-base"
+                placeholder="Your API key"
+                placeholderTextColor="#6B7280"
+                value={apiKey}
+                onChangeText={onApiKeyChange}
+                autoCapitalize="none"
+                autoCorrect={false}
+                secureTextEntry
+              />
+            </View>
+          )}
 
           {additionalFields}
 
@@ -132,7 +176,8 @@ export default function DownloadSettingsScreen() {
   } = useSettingsStore();
 
   const [nzbgetUrl, setNzbgetUrl] = useState(downloads.nzbget.serverUrl);
-  const [nzbgetKey, setNzbgetKey] = useState(downloads.nzbget.apiKey);
+  const [nzbgetUsername, setNzbgetUsername] = useState(downloads.nzbget.username || "");
+  const [nzbgetPassword, setNzbgetPassword] = useState(downloads.nzbget.password || "");
   const [radarrUrl, setRadarrUrl] = useState(downloads.radarr.serverUrl);
   const [radarrKey, setRadarrKey] = useState(downloads.radarr.apiKey);
   const [sonarrUrl, setSonarrUrl] = useState(downloads.sonarr.serverUrl);
@@ -142,9 +187,99 @@ export default function DownloadSettingsScreen() {
   const [testingRadarr, setTestingRadarr] = useState(false);
   const [testingSonarr, setTestingSonarr] = useState(false);
 
+  const [status, setStatus] = useState<{ visible: boolean; title: string; message: string }>({
+    visible: false,
+    title: "",
+    message: "",
+  });
+  const showStatus = (title: string, message: string) => setStatus({ visible: true, title, message });
+
+  // Radarr/Sonarr selection state
+  const [radarrProfiles, setRadarrProfiles] = useState<Array<{ id: number; name: string }>>([]);
+  const [radarrRoots, setRadarrRoots] = useState<Array<{ id: number; path: string }>>([]);
+  const [sonarrProfiles, setSonarrProfiles] = useState<Array<{ id: number; name: string }>>([]);
+  const [sonarrRoots, setSonarrRoots] = useState<Array<{ id: number; path: string }>>([]);
+
+  const [showRadarrProfileModal, setShowRadarrProfileModal] = useState(false);
+  const [showRadarrRootModal, setShowRadarrRootModal] = useState(false);
+  const [showSonarrProfileModal, setShowSonarrProfileModal] = useState(false);
+  const [showSonarrRootModal, setShowSonarrRootModal] = useState(false);
+
+  const [radarrProfileName, setRadarrProfileName] = useState(downloads.radarr.qualityProfile || "");
+  const [radarrProfileId, setRadarrProfileId] = useState(downloads.radarr.qualityProfileId || 0);
+  const [radarrRootPath, setRadarrRootPath] = useState(downloads.radarr.rootFolderPath || downloads.radarr.rootFolder || "");
+
+  const [sonarrProfileName, setSonarrProfileName] = useState(downloads.sonarr.qualityProfile || "");
+  const [sonarrProfileId, setSonarrProfileId] = useState(downloads.sonarr.qualityProfileId || 0);
+  const [sonarrRootPath, setSonarrRootPath] = useState(downloads.sonarr.rootFolderPath || downloads.sonarr.rootFolder || "");
+
+  const openRadarrProfiles = async () => {
+    if (!radarrUrl.trim() || !radarrKey.trim()) {
+      showStatus("Radarr Not Configured", "Enter Radarr URL and API key first.");
+      return;
+    }
+    try {
+      const svc = (await import("../api/radarr")).default;
+      svc.setCredentials(radarrUrl.trim(), radarrKey.trim());
+      const list = await svc.getQualityProfiles();
+      setRadarrProfiles(list.map((p: any) => ({ id: p.id, name: p.name })));
+      setShowRadarrProfileModal(true);
+    } catch (e) {
+      showStatus("Failed to Load Profiles", "Could not fetch Radarr quality profiles.");
+    }
+  };
+
+  const openRadarrRoots = async () => {
+    if (!radarrUrl.trim() || !radarrKey.trim()) {
+      showStatus("Radarr Not Configured", "Enter Radarr URL and API key first.");
+      return;
+    }
+    try {
+      const svc = (await import("../api/radarr")).default;
+      svc.setCredentials(radarrUrl.trim(), radarrKey.trim());
+      const list = await svc.getRootFolders();
+      setRadarrRoots(list.map((r: any) => ({ id: r.id, path: r.path })));
+      setShowRadarrRootModal(true);
+    } catch (e) {
+      showStatus("Failed to Load Folders", "Could not fetch Radarr root folders.");
+    }
+  };
+
+  const openSonarrProfiles = async () => {
+    if (!sonarrUrl.trim() || !sonarrKey.trim()) {
+      showStatus("Sonarr Not Configured", "Enter Sonarr URL and API key first.");
+      return;
+    }
+    try {
+      const svc = (await import("../api/sonarr")).default;
+      svc.setCredentials(sonarrUrl.trim(), sonarrKey.trim());
+      const list = await svc.getQualityProfiles();
+      setSonarrProfiles(list.map((p: any) => ({ id: p.id, name: p.name })));
+      setShowSonarrProfileModal(true);
+    } catch (e) {
+      showStatus("Failed to Load Profiles", "Could not fetch Sonarr quality profiles.");
+    }
+  };
+
+  const openSonarrRoots = async () => {
+    if (!sonarrUrl.trim() || !sonarrKey.trim()) {
+      showStatus("Sonarr Not Configured", "Enter Sonarr URL and API key first.");
+      return;
+    }
+    try {
+      const svc = (await import("../api/sonarr")).default;
+      svc.setCredentials(sonarrUrl.trim(), sonarrKey.trim());
+      const list = await svc.getRootFolders();
+      setSonarrRoots(list.map((r: any) => ({ id: r.id, path: r.path })));
+      setShowSonarrRootModal(true);
+    } catch (e) {
+      showStatus("Failed to Load Folders", "Could not fetch Sonarr root folders.");
+    }
+  };
+
   const handleTestNzbget = async () => {
-    if (!nzbgetUrl.trim() || !nzbgetKey.trim()) {
-      Alert.alert("Missing Information", "Please enter both server URL and API key.");
+    if (!nzbgetUrl.trim() || !nzbgetUsername.trim() || !nzbgetPassword.trim()) {
+      showStatus("Missing Information", "Please enter server URL, username, and password.");
       return;
     }
 
@@ -152,18 +287,19 @@ export default function DownloadSettingsScreen() {
       nzbget: {
         ...downloads.nzbget,
         serverUrl: nzbgetUrl.trim(),
-        apiKey: nzbgetKey.trim(),
+        username: nzbgetUsername.trim(),
+        password: nzbgetPassword.trim(),
       },
     });
 
     setTestingNzbget(true);
     try {
       const success = await testNZBGetConnection();
-      Alert.alert(
+      showStatus(
         success ? "NZBGet Connected" : "NZBGet Connection Failed",
-        success 
-          ? "Successfully connected to NZBGet!" 
-          : "Could not connect to NZBGet. Please check your settings."
+        success
+          ? "Successfully connected to NZBGet."
+          : "Could not connect. Please check your settings."
       );
     } finally {
       setTestingNzbget(false);
@@ -172,7 +308,7 @@ export default function DownloadSettingsScreen() {
 
   const handleTestRadarr = async () => {
     if (!radarrUrl.trim() || !radarrKey.trim()) {
-      Alert.alert("Missing Information", "Please enter both server URL and API key.");
+      showStatus("Missing Information", "Please enter both server URL and API key.");
       return;
     }
 
@@ -187,11 +323,11 @@ export default function DownloadSettingsScreen() {
     setTestingRadarr(true);
     try {
       const success = await testRadarrConnection();
-      Alert.alert(
+      showStatus(
         success ? "Radarr Connected" : "Radarr Connection Failed",
-        success 
-          ? "Successfully connected to Radarr!" 
-          : "Could not connect to Radarr. Please check your settings."
+        success
+          ? "Successfully connected to Radarr."
+          : "Could not connect. Please check your settings."
       );
     } finally {
       setTestingRadarr(false);
@@ -200,7 +336,7 @@ export default function DownloadSettingsScreen() {
 
   const handleTestSonarr = async () => {
     if (!sonarrUrl.trim() || !sonarrKey.trim()) {
-      Alert.alert("Missing Information", "Please enter both server URL and API key.");
+      showStatus("Missing Information", "Please enter both server URL and API key.");
       return;
     }
 
@@ -215,11 +351,11 @@ export default function DownloadSettingsScreen() {
     setTestingSonarr(true);
     try {
       const success = await testSonarrConnection();
-      Alert.alert(
+      showStatus(
         success ? "Sonarr Connected" : "Sonarr Connection Failed",
-        success 
-          ? "Successfully connected to Sonarr!" 
-          : "Could not connect to Sonarr. Please check your settings."
+        success
+          ? "Successfully connected to Sonarr."
+          : "Could not connect. Please check your settings."
       );
     } finally {
       setTestingSonarr(false);
@@ -231,7 +367,8 @@ export default function DownloadSettingsScreen() {
       nzbget: {
         ...downloads.nzbget,
         serverUrl: nzbgetUrl.trim(),
-        apiKey: nzbgetKey.trim(),
+        username: nzbgetUsername.trim(),
+        password: nzbgetPassword.trim(),
       },
       radarr: {
         ...downloads.radarr,
@@ -244,31 +381,19 @@ export default function DownloadSettingsScreen() {
         apiKey: sonarrKey.trim(),
       },
     });
-    Alert.alert("Settings Saved", "All download settings have been updated.");
+    showStatus("Settings Saved", "All download settings have been updated.");
   };
 
   const handleReset = () => {
-    Alert.alert(
-      "Reset Settings",
-      "Are you sure you want to reset all download settings?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Reset",
-          style: "destructive",
-          onPress: () => {
-            resetDownloadSettings();
-            setNzbgetUrl("");
-            setNzbgetKey("");
-            setRadarrUrl("");
-            setRadarrKey("");
-            setSonarrUrl("");
-            setSonarrKey("");
-            Alert.alert("Settings Reset", "Download settings have been reset.");
-          },
-        },
-      ]
-    );
+    resetDownloadSettings();
+    setNzbgetUrl("");
+    setNzbgetUsername("");
+    setNzbgetPassword("");
+    setRadarrUrl("");
+    setRadarrKey("");
+    setSonarrUrl("");
+    setSonarrKey("");
+    showStatus("Settings Reset", "Download settings have been reset.");
   };
 
   return (
@@ -285,9 +410,11 @@ export default function DownloadSettingsScreen() {
           service="nzbget"
           isConnected={downloads.nzbget.isConnected}
           serverUrl={nzbgetUrl}
-          apiKey={nzbgetKey}
+          username={nzbgetUsername}
+          password={nzbgetPassword}
           onServerUrlChange={setNzbgetUrl}
-          onApiKeyChange={setNzbgetKey}
+          onUsernameChange={setNzbgetUsername}
+          onPasswordChange={setNzbgetPassword}
           onTest={handleTestNzbget}
           testing={testingNzbget}
         />
@@ -307,11 +434,25 @@ export default function DownloadSettingsScreen() {
           additionalFields={
             <View className="mb-4">
               <Text className="text-gray-400 text-sm">
-                Quality Profile: {downloads.radarr.qualityProfile || "Not set"}
+                Quality Profile: {radarrProfileName || "Not set"}
               </Text>
-              <Text className="text-gray-400 text-sm">
-                Root Folder: {downloads.radarr.rootFolder || "Not set"}
+              <Pressable
+                onPress={openRadarrProfiles}
+                className="mt-2 bg-gray-800 rounded-lg px-3 py-2 self-start"
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                <Text className="text-blue-300 text-sm">Select Quality Profile</Text>
+              </Pressable>
+              <Text className="text-gray-400 text-sm mt-3">
+                Root Folder: {radarrRootPath || "Not set"}
               </Text>
+              <Pressable
+                onPress={openRadarrRoots}
+                className="mt-2 bg-gray-800 rounded-lg px-3 py-2 self-start"
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                <Text className="text-blue-300 text-sm">Select Root Folder</Text>
+              </Pressable>
             </View>
           }
         />
@@ -331,11 +472,25 @@ export default function DownloadSettingsScreen() {
           additionalFields={
             <View className="mb-4">
               <Text className="text-gray-400 text-sm">
-                Quality Profile: {downloads.sonarr.qualityProfile || "Not set"}
+                Quality Profile: {sonarrProfileName || "Not set"}
               </Text>
-              <Text className="text-gray-400 text-sm">
-                Root Folder: {downloads.sonarr.rootFolder || "Not set"}
+              <Pressable
+                onPress={openSonarrProfiles}
+                className="mt-2 bg-gray-800 rounded-lg px-3 py-2 self-start"
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                <Text className="text-blue-300 text-sm">Select Quality Profile</Text>
+              </Pressable>
+              <Text className="text-gray-400 text-sm mt-3">
+                Root Folder: {sonarrRootPath || "Not set"}
               </Text>
+              <Pressable
+                onPress={openSonarrRoots}
+                className="mt-2 bg-gray-800 rounded-lg px-3 py-2 self-start"
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                <Text className="text-blue-300 text-sm">Select Root Folder</Text>
+              </Pressable>
             </View>
           }
         />
@@ -390,6 +545,158 @@ export default function DownloadSettingsScreen() {
         {/* Add some bottom padding */}
         <View className="h-8" />
       </ScrollView>
+
+      {/* Status Modal */}
+      <Modal
+        visible={status.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setStatus({ visible: false, title: "", message: "" })}
+      >
+        <View className="flex-1 items-center justify-center bg-black/60">
+          <View className="bg-gray-900 rounded-xl p-5 w-11/12">
+            <Text className="text-white text-lg font-semibold mb-2">{status.title}</Text>
+            <Text className="text-gray-300 mb-4">{status.message}</Text>
+            <ActionButton
+              title="OK"
+              icon="checkmark"
+              onPress={() => setStatus({ visible: false, title: "", message: "" })}
+              variant="primary"
+              fullWidth
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Radarr Quality Profile Modal */}
+      <Modal
+        visible={showRadarrProfileModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowRadarrProfileModal(false)}
+      >
+        <View className="flex-1 items-center justify-center bg-black/60">
+          <View className="bg-gray-900 rounded-xl p-5 w-11/12 max-h-[70%]">
+            <Text className="text-white text-lg font-semibold mb-3">Select Radarr Quality Profile</Text>
+            <ScrollView className="max-h-[60%]">
+              {radarrProfiles.map((p) => (
+                <Pressable
+                  key={p.id}
+                  onPress={() => {
+                    setRadarrProfileName(p.name);
+                    setRadarrProfileId(p.id);
+                    updateDownloadSettings({
+                      radarr: { ...downloads.radarr, qualityProfile: p.name, qualityProfileId: p.id },
+                    });
+                    setShowRadarrProfileModal(false);
+                  }}
+                  className="py-3 border-b border-gray-800"
+                >
+                  <Text className="text-gray-200 text-base">{p.name}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+            <ActionButton title="Close" icon="close" onPress={() => setShowRadarrProfileModal(false)} variant="secondary" fullWidth />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Radarr Root Folder Modal */}
+      <Modal
+        visible={showRadarrRootModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowRadarrRootModal(false)}
+      >
+        <View className="flex-1 items-center justify-center bg-black/60">
+          <View className="bg-gray-900 rounded-xl p-5 w-11/12 max-h-[70%]">
+            <Text className="text-white text-lg font-semibold mb-3">Select Radarr Root Folder</Text>
+            <ScrollView className="max-h-[60%]">
+              {radarrRoots.map((r) => (
+                <Pressable
+                  key={r.id}
+                  onPress={() => {
+                    setRadarrRootPath(r.path);
+                    updateDownloadSettings({
+                      radarr: { ...downloads.radarr, rootFolder: r.path, rootFolderPath: r.path },
+                    });
+                    setShowRadarrRootModal(false);
+                  }}
+                  className="py-3 border-b border-gray-800"
+                >
+                  <Text className="text-gray-200 text-base">{r.path}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+            <ActionButton title="Close" icon="close" onPress={() => setShowRadarrRootModal(false)} variant="secondary" fullWidth />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Sonarr Quality Profile Modal */}
+      <Modal
+        visible={showSonarrProfileModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSonarrProfileModal(false)}
+      >
+        <View className="flex-1 items-center justify-center bg-black/60">
+          <View className="bg-gray-900 rounded-xl p-5 w-11/12 max-h-[70%]">
+            <Text className="text-white text-lg font-semibold mb-3">Select Sonarr Quality Profile</Text>
+            <ScrollView className="max-h-[60%]">
+              {sonarrProfiles.map((p) => (
+                <Pressable
+                  key={p.id}
+                  onPress={() => {
+                    setSonarrProfileName(p.name);
+                    setSonarrProfileId(p.id);
+                    updateDownloadSettings({
+                      sonarr: { ...downloads.sonarr, qualityProfile: p.name, qualityProfileId: p.id },
+                    });
+                    setShowSonarrProfileModal(false);
+                  }}
+                  className="py-3 border-b border-gray-800"
+                >
+                  <Text className="text-gray-200 text-base">{p.name}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+            <ActionButton title="Close" icon="close" onPress={() => setShowSonarrProfileModal(false)} variant="secondary" fullWidth />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Sonarr Root Folder Modal */}
+      <Modal
+        visible={showSonarrRootModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSonarrRootModal(false)}
+      >
+        <View className="flex-1 items-center justify-center bg-black/60">
+          <View className="bg-gray-900 rounded-xl p-5 w-11/12 max-h-[70%]">
+            <Text className="text-white text-lg font-semibold mb-3">Select Sonarr Root Folder</Text>
+            <ScrollView className="max-h-[60%]">
+              {sonarrRoots.map((r) => (
+                <Pressable
+                  key={r.id}
+                  onPress={() => {
+                    setSonarrRootPath(r.path);
+                    updateDownloadSettings({
+                      sonarr: { ...downloads.sonarr, rootFolder: r.path, rootFolderPath: r.path },
+                    });
+                    setShowSonarrRootModal(false);
+                  }}
+                  className="py-3 border-b border-gray-800"
+                >
+                  <Text className="text-gray-200 text-base">{r.path}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+            <ActionButton title="Close" icon="close" onPress={() => setShowSonarrRootModal(false)} variant="secondary" fullWidth />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
