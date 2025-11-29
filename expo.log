@@ -6,15 +6,16 @@ Starting Metro Bundler
 Waiting on http://localhost:8081
 Logs for your project will appear below.
 iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS ./index.ts ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 92.7% (1172/1217)
-iOS Bundled 4154ms index.ts (1372 modules)
+iOS Bundled 947ms index.ts (1306 modules)
 iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 42ms index.ts (1 module)
+iOS Bundled 40ms index.ts (1 module)
  WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
  LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
 iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 55ms index.ts (1 module)
+iOS Bundled 52ms index.ts (1 module)
  WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
  LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
- LOG  Navigate to IPTV settings
- LOG  Navigate to IPTV settings
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 44ms index.ts (1 module)
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
