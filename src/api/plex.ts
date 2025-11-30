@@ -85,14 +85,10 @@ class PlexService {
       // Step 2: Open browser for user to authenticate
       const authUrl = `https://app.plex.tv/auth#?clientID=${this.CLIENT_IDENTIFIER}&code=${code}&context%5Bdevice%5D%5Bproduct%5D=${encodeURIComponent(this.PRODUCT_NAME)}`;
 
-      const result = await WebBrowser.openAuthSessionAsync(authUrl, 'exp://');
+      // Open the browser (don't wait for it to close, start polling immediately)
+      WebBrowser.openAuthSessionAsync(authUrl, 'exp://');
 
-      // Check if user dismissed the browser
-      if (result.type === 'cancel' || result.type === 'dismiss') {
-        return null; // User cancelled
-      }
-
-      // Step 3: Poll for auth token
+      // Step 3: Poll for auth token (start immediately, don't wait for browser to close)
       let attempts = 0;
       const maxAttempts = 30; // 30 attempts = 30 seconds
 
