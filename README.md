@@ -94,6 +94,10 @@ React Native: 0.79.2
 ### 🎬 Movies & TV Shows
 - **Browse**: Popular, Trending, Top Rated, Upcoming (Movies) / Airing Today (TV)
 - **Search**: Multi-search with filtering by type (movies/TV)
+- **Integrated Search**: Bottom-of-screen search on Movies home with Plex library detection
+  - Separate sections for movies in Plex library vs. available to download
+  - Quick actions for downloading and viewing trailers
+  - Real-time Plex library matching
 - **Details**: Full metadata, cast, trailers, similar content, recommendations
 - **Watchlist**: Persistent watchlist with AsyncStorage
 - **Provider Filtering**: Browse by streaming service (Netflix, Disney+, Prime Video)
@@ -137,7 +141,12 @@ React Native: 0.79.2
 2. **TMDB Key Present**: Load 20 items per list from real TMDB API
 3. **No TMDB Key**: Pad mock data to 12 items per list
 4. **Provider Rows**: Load when TMDB key available (Netflix, Disney+, Prime)
-5. **Error Handling**: Graceful fallback to mocks on API errors
+5. **Bottom Search** (Movies only): Integrated search at bottom of screen
+   - Search movies by name
+   - Automatically checks Plex library for matches
+   - Separates results into "In Your Plex Library" and "Available to Download"
+   - Quick actions for download and trailer viewing
+6. **Error Handling**: Graceful fallback to mocks on API errors
 
 ### Details Screen
 1. **With TMDB Key**: Fetch full details, credits, videos, similar content
@@ -257,6 +266,10 @@ The app is running successfully with no errors. Recent activity shows:
 
 ## Recent Changes
 
+- ✅ Added integrated search at bottom of Movies home screen
+- ✅ Plex library detection in search results with visual separation
+- ✅ Quick action buttons for download and trailer on search results
+- ✅ Fixed Plex API timeout errors with 5-second timeout and silent error handling
 - ✅ Fixed YouTube trailer playback error (Error 153) with enhanced WebView configuration
 - ✅ Added Plex library detection on details screen
 - ✅ Visual indicator showing when content is already in Plex library

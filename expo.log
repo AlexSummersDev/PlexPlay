@@ -6,31 +6,226 @@ Starting Metro Bundler
 Waiting on http://localhost:8081
 Logs for your project will appear below.
 iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 1184ms index.ts (1372 modules)
-iOS Bundled 41ms index.ts (1 module)
+iOS Bundled 938ms index.ts (1315 modules)
+iOS Bundled 40ms index.ts (1 module)
  WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
  LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
- ERROR  Plex API request failed: [TypeError: Network request timed out]
- LOG  [console.error: Plex API request failed: TypeError: Network request timed out]
- ERROR  Error searching Plex library: [TypeError: Network request timed out]
- LOG  [console.error: Error searching Plex library: TypeError: Network request timed out]
- ERROR  Radarr API request failed: [TypeError: Network request timed out]
- LOG  [console.error: Radarr API request failed: TypeError: Network request timed out]
- ERROR  Radarr API request failed: [TypeError: Network request failed]
- LOG  [console.error: Radarr API request failed: TypeError: Network request failed]
- ERROR  Radarr API request failed: [TypeError: Network request failed]
- LOG  [console.error: Radarr API request failed: TypeError: Network request failed]
- ERROR  Radarr API request failed: [TypeError: Network request failed]
- LOG  [console.error: Radarr API request failed: TypeError: Network request failed]
- ERROR  Radarr API request failed: [TypeError: Network request failed]
- LOG  [console.error: Radarr API request failed: TypeError: Network request failed]
- ERROR  Radarr API request failed: [TypeError: Network request timed out]
- LOG  [console.error: Radarr API request failed: TypeError: Network request timed out]
- ERROR  Radarr API request failed: [TypeError: Network request timed out]
- LOG  [console.error: Radarr API request failed: TypeError: Network request timed out]
- ERROR  Radarr API request failed: [TypeError: Network request timed out]
- LOG  [console.error: Radarr API request failed: TypeError: Network request timed out]
- ERROR  Radarr API request failed: [TypeError: Network request timed out]
- LOG  [console.error: Radarr API request failed: TypeError: Network request timed out]
- ERROR  Radarr API request failed: [TypeError: Network request timed out]
- LOG  [console.error: Radarr API request failed: TypeError: Network request timed out]
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 53ms index.ts (1 module)
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
+ ERROR  Error searching Plex library: [Error: Plex connection timeout]
+ LOG  [console.error: Error searching Plex library: Error: Plex connection timeout]
+ ERROR  NZBGet API request failed: [TypeError: Network request timed out]
+ LOG  [console.error: NZBGet API request failed: TypeError: Network request timed out]
+ LOG  [console.error: The result of getSnapshot should be cached to avoid an infinite loop%s 
+    at HomeScreen (http://3f49df20-2679-4d42-8fdd-151df329cc0e.tunnel.vibecodeapp.io/src/screens/HomeScreen.bundle//&platform=ios&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable&dev=true&minify=false&modulesOnly=true&runModule=false&shallow=true:23:48)
+    at StaticContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:138256:17)
+    at EnsureSingleNavigator (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:133925:24)
+    at SceneView (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:138101:22)
+    at RNSScreenContentWrapper (<anonymous>)
+    at ScreenContentWrapper (<anonymous>)
+    at DebugContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:154840:36)
+    at RNSScreen (<anonymous>)
+    at Animated(Anonymous) (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:72309:47)
+    at Suspender (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153851:22)
+    at Suspense (<anonymous>)
+    at Freeze (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153861:23)
+    at DelayedFreeze (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153816:22)
+    at InnerScreen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153608:41)
+    at Screen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153782:50)
+    at ScreenStackItem (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:154718:24)
+    at SceneView (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:178263:21)
+    at RNSScreenStack (<anonymous>)
+    at anonymous (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:154645:20)
+    at ScreenStack (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:154590:30)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at SafeAreaProviderCompat (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:152110:24)
+    at NativeStackView (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:178577:22)
+    at PreventRemoveProvider (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:136426:25)
+    at NavigationContent (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:137831:22)
+    at anonymous (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:137846:27)
+    at NativeStackNavigator (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:178178:18)
+    at MoviesStack (<anonymous>)
+    at StaticContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:138256:17)
+    at EnsureSingleNavigator (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:133925:24)
+    at SceneView (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:138101:22)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at CssInterop.View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:10271:45)
+    at Animated(View) (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:72309:47)
+    at Background (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:148599:21)
+    at Screen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:152225:71)
+    at RNSScreen (<anonymous>)
+    at Animated(Anonymous) (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:72309:47)
+    at Suspender (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153851:22)
+    at Suspense (<anonymous>)
+    at Freeze (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153861:23)
+    at DelayedFreeze (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153816:22)
+    at InnerScreen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153608:41)
+    at Screen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153782:50)
+    at MaybeScreen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153216:24)
+    at RNSScreenNavigationContainer (<anonymous>)
+    at ScreenContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:154510:31)
+    at MaybeScreenContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153202:23)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at SafeAreaProviderCompat (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:152110:24)
+    at BottomTabView (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:148097:30)
+    at PreventRemoveProvider (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:136426:25)
+    at NavigationContent (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:137831:22)
+    at anonymous (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:137846:27)
+    at BottomTabNavigator (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:148007:18)
+    at TabNavigator (<anonymous>)
+    at ThemeProvider (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:134057:21)
+    at EnsureSingleNavigator (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:133925:24)
+    at BaseNavigationContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:132213:28)
+    at NavigationContainerInner (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:139316:30)
+    at SafeAreaEnv (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:117294:26)
+    at RNCSafeAreaProvider (<anonymous>)
+    at SafeAreaProvider (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:117407:24)
+    at SafeAreaProviderShim (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:117320:27)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at CssInterop.View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:10271:45)
+    at GestureHandlerRootView (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:141513:21)
+    at App (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:131401:51)
+    at withDevTools(App) (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:130904:27)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at CssInterop.View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:10271:45)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at CssInterop.View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:10271:45)
+    at AppContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:62950:25)
+    at main(RootComponent) (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:79451:28)]
+ ERROR  The result of getSnapshot should be cached to avoid an infinite loop%s
+
+[0m [90m 16 |[39m
+ [90m 17 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mHomeScreen[39m() {
+[31m[1m>[22m[39m[90m 18 |[39m   [36mconst[39m navigation [33m=[39m useNavigation[33m<[39m[33mHomeScreenNavigationProp[39m[33m>[39m()[33m;[39m
+ [90m    |[39m                                   [31m[1m^[22m[39m
+ [90m 19 |[39m   [36mconst[39m [searchQuery[33m,[39m setSearchQuery] [33m=[39m useState([32m""[39m)[33m;[39m
+ [90m 20 |[39m   [36mconst[39m [refreshing[33m,[39m setRefreshing] [33m=[39m useState([36mfalse[39m)[33m;[39m
+ [90m 21 |[39m   [36mconst[39m [error[33m,[39m setError] [33m=[39m useState[33m<[39m[33mstring[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[33m;[39m[0m
+
+Call Stack
+  HomeScreen (src/screens/HomeScreen.tsx:18:35)
+  ScreenContentWrapper (<anonymous>)
+  RNSScreenStack (<anonymous>)
+  MoviesStack (<anonymous>)
+  TabNavigator (<anonymous>)
+  RNCSafeAreaProvider (<anonymous>)
+  App (App.tsx:33:43)
+ LOG  [Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.]
+ LOG  [Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.]
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 132ms index.ts (1 module)
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
+ LOG  [console.error: The result of getSnapshot should be cached to avoid an infinite loop%s 
+    at HomeScreen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:179085:48)
+    at StaticContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:138256:17)
+    at EnsureSingleNavigator (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:133925:24)
+    at SceneView (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:138101:22)
+    at RNSScreenContentWrapper (<anonymous>)
+    at ScreenContentWrapper (<anonymous>)
+    at DebugContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:154840:36)
+    at RNSScreen (<anonymous>)
+    at Animated(Anonymous) (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:72309:47)
+    at Suspender (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153851:22)
+    at Suspense (<anonymous>)
+    at Freeze (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153861:23)
+    at DelayedFreeze (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153816:22)
+    at InnerScreen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153608:41)
+    at Screen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153782:50)
+    at ScreenStackItem (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:154718:24)
+    at SceneView (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:178263:21)
+    at RNSScreenStack (<anonymous>)
+    at anonymous (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:154645:20)
+    at ScreenStack (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:154590:30)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at SafeAreaProviderCompat (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:152110:24)
+    at NativeStackView (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:178577:22)
+    at PreventRemoveProvider (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:136426:25)
+    at NavigationContent (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:137831:22)
+    at anonymous (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:137846:27)
+    at NativeStackNavigator (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:178178:18)
+    at MoviesStack (<anonymous>)
+    at StaticContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:138256:17)
+    at EnsureSingleNavigator (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:133925:24)
+    at SceneView (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:138101:22)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at CssInterop.View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:10271:45)
+    at Animated(View) (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:72309:47)
+    at Background (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:148599:21)
+    at Screen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:152225:71)
+    at RNSScreen (<anonymous>)
+    at Animated(Anonymous) (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:72309:47)
+    at Suspender (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153851:22)
+    at Suspense (<anonymous>)
+    at Freeze (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153861:23)
+    at DelayedFreeze (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153816:22)
+    at InnerScreen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153608:41)
+    at Screen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153782:50)
+    at MaybeScreen (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153216:24)
+    at RNSScreenNavigationContainer (<anonymous>)
+    at ScreenContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:154510:31)
+    at MaybeScreenContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:153202:23)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at SafeAreaProviderCompat (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:152110:24)
+    at BottomTabView (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:148097:30)
+    at PreventRemoveProvider (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:136426:25)
+    at NavigationContent (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:137831:22)
+    at anonymous (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:137846:27)
+    at BottomTabNavigator (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:148007:18)
+    at TabNavigator (<anonymous>)
+    at ThemeProvider (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:134057:21)
+    at EnsureSingleNavigator (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:133925:24)
+    at BaseNavigationContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:132213:28)
+    at NavigationContainerInner (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:139316:30)
+    at SafeAreaEnv (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:117294:26)
+    at RNCSafeAreaProvider (<anonymous>)
+    at SafeAreaProvider (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:117407:24)
+    at SafeAreaProviderShim (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:117320:27)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at CssInterop.View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:10271:45)
+    at GestureHandlerRootView (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:141513:21)
+    at App (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:131401:51)
+    at withDevTools(App) (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:130904:27)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at CssInterop.View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:10271:45)
+    at RCTView (<anonymous>)
+    at View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63049:43)
+    at CssInterop.View (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:10271:45)
+    at AppContainer (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:62950:25)
+    at main(RootComponent) (http://4.155.35.3:8081/index.ts.bundle//&platform=ios&dev=true&hot=false&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable:79451:28)]
+ LOG  [Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.]
+ ERROR  The result of getSnapshot should be cached to avoid an infinite loop%s
+
+[0m [90m 16 |[39m
+ [90m 17 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mHomeScreen[39m() {
+[31m[1m>[22m[39m[90m 18 |[39m   [36mconst[39m navigation [33m=[39m useNavigation[33m<[39m[33mHomeScreenNavigationProp[39m[33m>[39m()[33m;[39m
+ [90m    |[39m                                   [31m[1m^[22m[39m
+ [90m 19 |[39m   [36mconst[39m [searchQuery[33m,[39m setSearchQuery] [33m=[39m useState([32m""[39m)[33m;[39m
+ [90m 20 |[39m   [36mconst[39m [refreshing[33m,[39m setRefreshing] [33m=[39m useState([36mfalse[39m)[33m;[39m
+ [90m 21 |[39m   [36mconst[39m [error[33m,[39m setError] [33m=[39m useState[33m<[39m[33mstring[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[33m;[39m[0m
+
+Call Stack
+  HomeScreen (src/screens/HomeScreen.tsx:18:35)
+  ScreenContentWrapper (<anonymous>)
+  RNSScreenStack (<anonymous>)
+  MoviesStack (<anonymous>)
+  TabNavigator (<anonymous>)
+  RNCSafeAreaProvider (<anonymous>)
+  App (App.tsx:33:43)
