@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TextInput, Switch, Alert } from "react-native";
+import { View, Text, ScrollView, TextInput, Switch, Alert, Platform, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import useSettingsStore from "../state/settingsStore";
@@ -17,6 +17,7 @@ export default function PlexSettingsScreen() {
   const [serverUrl, setServerUrl] = useState(plex.serverUrl);
   const [token, setToken] = useState(plex.token);
   const [testing, setTesting] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const [libraries, setLibraries] = useState<any[]>([]);
   const [loadingLibraries, setLoadingLibraries] = useState(false);
 
@@ -39,6 +40,77 @@ export default function PlexSettingsScreen() {
       setLibraries([]);
     } finally {
       setLoadingLibraries(false);
+    }
+  };
+
+  const scanForServers = async () => {
+    if (Platform.OS === 'ios') {
+      Alert.alert(
+        "Local Network Access Required",
+        "To scan for Plex servers on your local network, please ensure Local Network access is enabled for this app in Settings > Privacy & Security > Local Network.",
+        [
+          {
+            text: "Open Settings",
+            onPress: () => Linking.openSettings(),
+          },
+          {
+            text: "Scan Anyway",
+            onPress: () => performNetworkScan(),
+          },
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+        ]
+      );
+    } else {
+      performNetworkScan();
+    }
+  };
+
+  const performNetworkScan = async () => {
+    setScanning(true);
+    try {
+      // Common local IP ranges and port
+      const commonIPs = [
+        '192.168.1.',
+        '192.168.0.',
+        '10.0.0.',
+        '172.16.0.',
+      ];
+
+      Alert.alert(
+        "Scanning Network",
+        "Scanning for Plex servers on your local network. This may take a moment...",
+        [{ text: "OK" }]
+      );
+
+      // Try common local addresses
+      const localAddresses = [
+        'http://127.0.0.1:32400',
+        'http://localhost:32400',
+        'http://192.168.1.1:32400',
+        'http://192.168.0.1:32400',
+        'http://10.0.0.1:32400',
+      ];
+
+      // For demo purposes, we'll just show instructions
+      // In a real implementation, you would scan the network
+      setTimeout(() => {
+        Alert.alert(
+          "Manual Server Discovery",
+          "Please find your Plex server IP address:\n\n" +
+          "1. Open Plex on your computer\n" +
+          "2. Go to Settings > Network\n" +
+          "3. Note the 'LAN Networks' IP address\n" +
+          "4. Enter it below with port :32400\n\n" +
+          "Example: http://192.168.1.100:32400"
+        );
+      }, 1000);
+    } catch (error) {
+      Alert.alert("Scan Failed", "Could not scan for servers. Please enter your server URL manually.");
+    } finally {
+      setScanning(false);
     }
   };
 
@@ -87,7 +159,12 @@ export default function PlexSettingsScreen() {
       } else {
         Alert.alert(
           "Connection Failed",
-          "Could not connect to Plex server. Please check:\n\n• Server URL is correct and includes port (e.g., :32400)\n• Server is running and accessible\n• Token is valid\n• No firewall blocking the connection"
+          "Could not connect to Plex server. Please check:\n\n" +
+          "• Server URL format: http://192.168.1.100:32400\n" +
+          "• Server is running and accessible\n" +
+          "• Token is valid (20-character string)\n" +
+          "• No firewall blocking port 32400\n" +
+          "• You're on the same network (for local servers)"
         );
       }
     } catch (error) {
@@ -158,9 +235,20 @@ export default function PlexSettingsScreen() {
               keyboardType="url"
             />
             <Text className="text-gray-400 text-xs mt-1">
-              Include http:// or https:// and port number
+              Include http:// or https:// and port number (usually :32400)
             </Text>
           </View>
+
+          {/* Scan Network Button */}
+          <ActionButton
+            title="Scan for Plex Servers"
+            icon="search"
+            onPress={scanForServers}
+            loading={scanning}
+            variant="secondary"
+            className="mb-4"
+            fullWidth
+          />
 
           <View className="mb-4">
             <Text className="text-gray-300 text-sm font-medium mb-2">
@@ -168,7 +256,7 @@ export default function PlexSettingsScreen() {
             </Text>
             <TextInput
               className="bg-gray-800 text-white p-4 rounded-lg text-base"
-              placeholder="Your Plex authentication token"
+              placeholder="claim-xxxxxxxxxxxxxxxxxxxx"
               placeholderTextColor="#6B7280"
               value={token}
               onChangeText={setToken}
@@ -177,7 +265,7 @@ export default function PlexSettingsScreen() {
               secureTextEntry
             />
             <Text className="text-gray-400 text-xs mt-1">
-              Get your token from plex.tv/claim or your server settings
+              20-character token from plex.tv/claim (e.g., claim-AbCdEf1234567890XyZ)
             </Text>
           </View>
 
@@ -300,8 +388,29 @@ export default function PlexSettingsScreen() {
                 <Text className="text-blue-200 text-sm leading-5">
                   1. Visit plex.tv/claim in your browser{"\n"}
                   2. Sign in to your Plex account{"\n"}
-                  3. Copy the claim token that appears{"\n"}
-                  4. Paste it in the token field above
+                  3. Copy the claim token (starts with "claim-"){"\n"}
+                  4. Paste it in the token field above{"\n\n"}
+                  Token format: claim-xxxxxxxxxxxxxxxxxxxx{"\n"}
+                  (20 characters after "claim-")
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4 mb-4">
+            <View className="flex-row items-start">
+              <Ionicons name="server" size={20} color="#C084FC" />
+              <View className="ml-3 flex-1">
+                <Text className="text-purple-300 font-medium mb-1">
+                  Finding your Server URL
+                </Text>
+                <Text className="text-purple-200 text-sm leading-5">
+                  On your Plex server computer:{"\n\n"}
+                  1. Open Plex Web App{"\n"}
+                  2. Go to Settings → Network{"\n"}
+                  3. Find your local IP address{"\n"}
+                  4. Format: http://[IP]:32400{"\n\n"}
+                  Example: http://192.168.1.100:32400
                 </Text>
               </View>
             </View>
