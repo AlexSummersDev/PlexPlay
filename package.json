@@ -6,7 +6,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build:web": "expo export --platform web",
+    "deploy": "bun run build:web"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
@@ -89,7 +91,7 @@
     "openai": "^4.89.0",
     "patch-package": "^8.0.0",
     "react": "19.0.0",
-    "react-dom": "19.0.0",
+    "react-dom": "^19.2.0",
     "react-native": "0.79.2",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-get-random-values": "~1.11.0",
@@ -106,7 +108,7 @@
     "react-native-svg": "15.11.2",
     "react-native-view-shot": "~4.0.3",
     "react-native-vision-camera": "^4.6.4",
-    "react-native-web": "~0.20.0",
+    "react-native-web": "^0.21.2",
     "react-native-webview": "13.13.5",
     "tailwind-merge": "^3.2.0",
     "tailwindcss": "^3.4.17",
@@ -117,6 +119,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@expo/webpack-config": "^19.0.1",
+    "@types/minimatch": "^6.0.0",
     "@types/react": "~19.0.10",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",

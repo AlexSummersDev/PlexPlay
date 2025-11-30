@@ -264,6 +264,28 @@ bun run start
 # Start with specific platform
 bun run ios
 bun run android
+bun run web
+```
+
+## Web Deployment
+
+This app can be deployed as a web application! See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
+
+### Quick Deploy to GitHub Pages
+
+1. Push your code to GitHub
+2. Enable GitHub Pages in repository settings (Settings → Pages → Source: GitHub Actions)
+3. The app will auto-deploy when you push to `main` branch
+
+Your app will be available at: `https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/`
+
+### Build Web Version Locally
+
+```bash
+# Build for production
+bun run build:web
+
+# The build output will be in the `dist` folder
 ```
 
 ## Environment Variables
