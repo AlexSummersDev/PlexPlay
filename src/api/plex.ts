@@ -1,14 +1,23 @@
 // Plex API Service
 // Note: Plex API is unofficial and requires authentication
 
-// Interface for future use
-// interface PlexServer {
-//   name: string;
-//   host: string;
-//   port: number;
-//   machineIdentifier: string;
-//   version: string;
-// }
+import * as WebBrowser from 'expo-web-browser';
+import { Platform } from 'react-native';
+
+WebBrowser.maybeCompleteAuthSession();
+
+interface PlexServer {
+  name: string;
+  host: string;
+  port: number;
+  machineIdentifier: string;
+  version: string;
+  address: string;
+  publicAddress?: string;
+  localAddresses?: string[];
+  owned: boolean;
+  accessToken: string;
+}
 
 interface PlexLibrary {
   key: string;
@@ -33,13 +42,132 @@ interface PlexMediaItem {
   updatedAt: number;
 }
 
+interface PlexAuthPinResponse {
+  id: number;
+  code: string;
+  authToken?: string;
+}
+
 class PlexService {
   private baseUrl: string = "";
   private token: string = "";
+  private readonly CLIENT_IDENTIFIER = "vibecode-plex-app";
+  private readonly PRODUCT_NAME = "Vibecode Plex Client";
+  private readonly PLEX_TV_URL = "https://plex.tv";
 
   setCredentials(serverUrl: string, token: string) {
     this.baseUrl = serverUrl.replace(/\/$/, ""); // Remove trailing slash
     this.token = token;
+  }
+
+  // Plex OAuth Authentication Flow
+  async authenticate(): Promise<{ authToken: string; servers: PlexServer[] } | null> {
+    try {
+      // Step 1: Request a PIN from Plex
+      const pinResponse = await fetch(`${this.PLEX_TV_URL}/api/v2/pins`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-Plex-Product': this.PRODUCT_NAME,
+          'X-Plex-Client-Identifier': this.CLIENT_IDENTIFIER,
+        },
+        body: JSON.stringify({ strong: true }),
+      });
+
+      if (!pinResponse.ok) {
+        throw new Error('Failed to request Plex PIN');
+      }
+
+      const pinData: PlexAuthPinResponse = await pinResponse.json();
+      const { id, code } = pinData;
+
+      // Step 2: Open browser for user to authenticate
+      const authUrl = `https://app.plex.tv/auth#?clientID=${this.CLIENT_IDENTIFIER}&code=${code}&context%5Bdevice%5D%5Bproduct%5D=${encodeURIComponent(this.PRODUCT_NAME)}`;
+
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, 'exp://');
+
+      // Step 3: Poll for auth token
+      let attempts = 0;
+      const maxAttempts = 60; // 60 attempts = 1 minute
+
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+
+        const checkResponse = await fetch(`${this.PLEX_TV_URL}/api/v2/pins/${id}`, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Plex-Client-Identifier': this.CLIENT_IDENTIFIER,
+          },
+        });
+
+        if (checkResponse.ok) {
+          const checkData: PlexAuthPinResponse = await checkResponse.json();
+
+          if (checkData.authToken) {
+            // Step 4: Get user's servers
+            const servers = await this.getServers(checkData.authToken);
+
+            return {
+              authToken: checkData.authToken,
+              servers,
+            };
+          }
+        }
+
+        attempts++;
+      }
+
+      throw new Error('Authentication timeout');
+    } catch (error) {
+      console.error('Plex authentication error:', error);
+      return null;
+    }
+  }
+
+  // Get user's Plex servers
+  async getServers(authToken: string): Promise<PlexServer[]> {
+    try {
+      const response = await fetch(`${this.PLEX_TV_URL}/api/v2/resources?includeHttps=1&includeRelay=1`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Plex-Token': authToken,
+          'X-Plex-Client-Identifier': this.CLIENT_IDENTIFIER,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch servers');
+      }
+
+      const servers: PlexServer[] = await response.json();
+
+      // Filter for owned servers that are online
+      return servers.filter(server =>
+        server.owned &&
+        server.name &&
+        (server.address || server.publicAddress || (server.localAddresses && server.localAddresses.length > 0))
+      );
+    } catch (error) {
+      console.error('Error fetching servers:', error);
+      return [];
+    }
+  }
+
+  // Get best connection URL for a server
+  getBestServerUrl(server: PlexServer): string {
+    // Prefer local address if available
+    if (server.localAddresses && server.localAddresses.length > 0) {
+      return `http://${server.localAddresses[0]}:${server.port}`;
+    }
+
+    // Then public address
+    if (server.publicAddress) {
+      return `https://${server.publicAddress}:${server.port}`;
+    }
+
+    // Fallback to address
+    return server.address;
   }
 
   private async makeRequest<T>(endpoint: string, params: Record<string, string> = {}, timeoutMs: number = 5000): Promise<T> {

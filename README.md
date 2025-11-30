@@ -221,8 +221,12 @@ The app uses a bottom tab navigator with 4 tabs:
 - **Connection Testing**: Validates server accessibility
 
 ### Plex
-- **Authentication**: Token-based (placeholder for OAuth flow)
-- **Server Discovery**: Detect local Plex servers
+- **Authentication**: OAuth 2.0 flow with automatic server discovery
+  - One-tap login with Plex account
+  - Automatic server discovery and selection
+  - Secure token-based authentication
+  - Fallback to manual configuration for advanced users
+- **Server Discovery**: Detect local and remote Plex servers
 - **Library Sync**: Import watchlist from Plex
 - **Content Detection**: Automatically checks if movies/shows are in your Plex library
 - **Search by Title and Year**: Intelligent matching of TMDB content to Plex library items
@@ -286,16 +290,13 @@ The app is running successfully with no errors. Recent activity shows:
 3. **Plex Library Matching**: Works best when Plex libraries use TMDB/TVDB agents for metadata
 4. **App Clip Support**: Configured but not fully implemented
 5. **React Native 0.79.2**: Using patched version (see `patches/` folder)
-6. **Vibecode Sandbox Limitations**:
-   - Local network access to Plex servers may be restricted in the sandbox environment
-   - For full Plex functionality, consider:
-     - Using Plex remote access with public URLs
-     - Setting up port forwarding on your router
-     - Deploying the app to a physical device
-     - Using plex.direct URLs for remote access
+6. **Plex OAuth**: Uses official Plex OAuth 2.0 flow for secure authentication. Opens browser for login and automatically discovers servers.
 
 ## Recent Changes
 
+- ✅ **Plex OAuth Authentication** - One-tap login with automatic server discovery
+- ✅ **Smart Server Selection** - Automatically choose best connection (local or remote)
+- ✅ **Multiple Server Support** - Handle accounts with multiple Plex servers
 - ✅ **Replaced Live TV tab with Search tab** - Improved navigation with dedicated search at the bottom
 - ✅ **Added Plex video player** - Direct playback from Plex library with full controls
 - ✅ **Play from Plex button** - Instantly play content that's in your Plex library

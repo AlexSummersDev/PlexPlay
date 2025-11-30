@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TextInput, Switch, Alert, Platform, Linking } from "react-native";
+import { View, Text, ScrollView, TextInput, Switch, Alert, Platform, Linking, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import useSettingsStore from "../state/settingsStore";
@@ -18,8 +18,10 @@ export default function PlexSettingsScreen() {
   const [token, setToken] = useState(plex.token);
   const [testing, setTesting] = useState(false);
   const [scanning, setScanning] = useState(false);
+  const [authenticating, setAuthenticating] = useState(false);
   const [libraries, setLibraries] = useState<any[]>([]);
   const [loadingLibraries, setLoadingLibraries] = useState(false);
+  const [availableServers, setAvailableServers] = useState<any[]>([]);
 
   useEffect(() => {
     if (plex.isConnected && plex.serverUrl && plex.token) {
@@ -204,6 +206,99 @@ export default function PlexSettingsScreen() {
     updatePlexSettings({ autoSync: value });
   };
 
+  const handleOAuthLogin = async () => {
+    setAuthenticating(true);
+    try {
+      const result = await plexService.authenticate();
+
+      if (result) {
+        const { authToken, servers } = result;
+
+        if (servers.length === 0) {
+          Alert.alert(
+            "No Servers Found",
+            "You don't have any Plex servers associated with your account. Please set up a Plex server first."
+          );
+          setAuthenticating(false);
+          return;
+        }
+
+        // Save available servers
+        setAvailableServers(servers);
+
+        // If only one server, auto-select it
+        if (servers.length === 1) {
+          const server = servers[0];
+          const bestUrl = plexService.getBestServerUrl(server);
+
+          updatePlexSettings({
+            serverUrl: bestUrl,
+            token: authToken,
+          });
+
+          setServerUrl(bestUrl);
+          setToken(authToken);
+
+          // Test connection and load libraries
+          plexService.setCredentials(bestUrl, authToken);
+          const connectionSuccess = await testPlexConnection();
+
+          if (connectionSuccess) {
+            await loadLibraries();
+            Alert.alert(
+              "Login Successful!",
+              `Connected to ${server.name}\n\nYou can now browse your Plex library.`
+            );
+          }
+        } else {
+          // Multiple servers - show selection
+          Alert.alert(
+            "Select Your Server",
+            "You have multiple Plex servers. Please select one below.",
+            [{ text: "OK" }]
+          );
+        }
+      } else {
+        Alert.alert(
+          "Login Failed",
+          "Could not authenticate with Plex. Please try again or check your internet connection."
+        );
+      }
+    } catch (error) {
+      console.error("OAuth error:", error);
+      Alert.alert(
+        "Login Error",
+        "An error occurred during authentication. Please try again."
+      );
+    } finally {
+      setAuthenticating(false);
+    }
+  };
+
+  const handleSelectServer = async (server: any) => {
+    const bestUrl = plexService.getBestServerUrl(server);
+
+    updatePlexSettings({
+      serverUrl: bestUrl,
+      token: token, // Use existing auth token
+    });
+
+    setServerUrl(bestUrl);
+
+    // Test connection and load libraries
+    plexService.setCredentials(bestUrl, token);
+    const connectionSuccess = await testPlexConnection();
+
+    if (connectionSuccess) {
+      await loadLibraries();
+      setAvailableServers([]); // Clear server list
+      Alert.alert(
+        "Server Connected",
+        `Successfully connected to ${server.name}`
+      );
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-black">
       <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
@@ -218,30 +313,85 @@ export default function PlexSettingsScreen() {
 
         {/* Sandbox Warning */}
         {!plex.isConnected && (
-          <View className="bg-orange-900/20 border border-orange-700/40 rounded-lg p-4 mb-6">
+          <View className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
             <View className="flex-row items-start">
-              <Ionicons name="warning" size={20} color="#FB923C" />
+              <Ionicons name="information-circle" size={20} color="#60A5FA" />
               <View className="ml-3 flex-1">
-                <Text className="text-orange-300 font-medium mb-1">
-                  Development Environment Limitations
+                <Text className="text-blue-300 font-medium mb-1">
+                  Easy Plex Login
                 </Text>
-                <Text className="text-orange-200 text-sm leading-5">
-                  If you're running this in Vibecode's sandbox, local network access to your Plex server may be restricted. For full Plex functionality, you may need to:
-                  {"\n\n"}
-                  • Use a publicly accessible Plex URL{"\n"}
-                  • Set up port forwarding on your router{"\n"}
-                  • Use Plex.tv remote access{"\n"}
-                  • Deploy the app to a physical device
+                <Text className="text-blue-200 text-sm leading-5">
+                  Click "Login with Plex" to authenticate with your Plex account. This will automatically discover your servers and connect you to your library.
                 </Text>
               </View>
             </View>
           </View>
         )}
 
+        {/* OAuth Login Button */}
+        {!plex.isConnected && (
+          <View className="mb-6">
+            <ActionButton
+              title="Login with Plex"
+              icon="log-in"
+              onPress={handleOAuthLogin}
+              loading={authenticating}
+              variant="primary"
+              fullWidth
+            />
+            <Text className="text-gray-400 text-center text-sm mt-3">
+              Recommended: Easy one-tap authentication
+            </Text>
+          </View>
+        )}
+
+        {/* Server Selection */}
+        {availableServers.length > 0 && (
+          <View className="mb-6">
+            <Text className="text-white text-lg font-semibold mb-4">
+              Select Your Plex Server
+            </Text>
+            {availableServers.map((server, index) => (
+              <Pressable
+                key={index}
+                onPress={() => handleSelectServer(server)}
+                className="bg-gray-800/50 rounded-lg p-4 mb-3"
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-1">
+                    <Text className="text-white font-medium text-base">
+                      {server.name}
+                    </Text>
+                    <Text className="text-gray-400 text-sm mt-1">
+                      {server.localAddresses?.[0] || server.publicAddress || server.address}
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#6B7280" />
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        )}
+
+        {/* Divider */}
+        {!plex.isConnected && (
+          <View className="flex-row items-center mb-6">
+            <View className="flex-1 h-px bg-gray-700" />
+            <Text className="text-gray-500 text-sm mx-4">OR</Text>
+            <View className="flex-1 h-px bg-gray-700" />
+          </View>
+        )}
+
         {/* Server Configuration */}
         <View className="mb-6">
-          <Text className="text-white text-lg font-semibold mb-4">
-            Server Configuration
+          <Text className="text-white text-lg font-semibold mb-2">
+            Manual Configuration
+          </Text>
+          <Text className="text-gray-400 text-sm mb-4">
+            Advanced: Manually enter your server details
           </Text>
 
           <View className="mb-4">
@@ -407,7 +557,7 @@ export default function PlexSettingsScreen() {
               <Ionicons name="information-circle" size={20} color="#60A5FA" />
               <View className="ml-3 flex-1">
                 <Text className="text-blue-300 font-medium mb-1">
-                  How to get your Plex Token
+                  How to get your Plex Token (Manual Method)
                 </Text>
                 <Text className="text-blue-200 text-sm leading-5">
                   1. Visit plex.tv/claim in your browser{"\n"}
