@@ -133,6 +133,53 @@ class PlexService {
     return `${this.baseUrl}${path}?X-Plex-Token=${this.token}`;
   }
 
+  // Check if a movie or TV show is in the Plex library
+  async findMediaByTitle(title: string, year?: number, type?: 'movie' | 'tv'): Promise<PlexMediaItem | null> {
+    try {
+      // First try searching
+      const searchResults = await this.search(title);
+
+      // Filter by type if specified
+      let filteredResults = searchResults;
+      if (type) {
+        const plexType = type === 'movie' ? 'movie' : 'show';
+        filteredResults = searchResults.filter(item => {
+          // Extract type from GUID
+          const guidLower = item.guid.toLowerCase();
+          return guidLower.includes(plexType);
+        });
+      }
+
+      // Try to find exact match by title and year
+      for (const item of filteredResults) {
+        const titleMatch = item.title.toLowerCase() === title.toLowerCase();
+        const yearMatch = !year || item.year === year;
+
+        if (titleMatch && yearMatch) {
+          return item;
+        }
+      }
+
+      // If no exact match, try partial title match with year
+      if (year) {
+        for (const item of filteredResults) {
+          const titleSimilar = item.title.toLowerCase().includes(title.toLowerCase()) ||
+                               title.toLowerCase().includes(item.title.toLowerCase());
+          const yearMatch = item.year === year;
+
+          if (titleSimilar && yearMatch) {
+            return item;
+          }
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error searching Plex library:", error);
+      return null;
+    }
+  }
+
   // Mock data for development
   getMockLibraries(): PlexLibrary[] {
     return [

@@ -97,6 +97,8 @@ React Native: 0.79.2
 - **Details**: Full metadata, cast, trailers, similar content, recommendations
 - **Watchlist**: Persistent watchlist with AsyncStorage
 - **Provider Filtering**: Browse by streaming service (Netflix, Disney+, Prime Video)
+- **Plex Integration**: Automatically checks if content is in your Plex library on details screen
+- **Enhanced Trailer Playback**: Improved YouTube trailer player with fallback to external app
 - **TMDB Integration**:
   - Real API data when TMDB key is configured
   - Graceful mock data fallback when key is missing
@@ -140,11 +142,13 @@ React Native: 0.79.2
 ### Details Screen
 1. **With TMDB Key**: Fetch full details, credits, videos, similar content
 2. **Without Key**: Show mock data with banner prompting to add key
-3. **Actions Available**:
+3. **Plex Library Check**: Automatically searches connected Plex server to check if content is available
+4. **Actions Available**:
    - Add/Remove from watchlist (always available)
-   - Play trailer (when available)
+   - Play trailer (when available) - Enhanced WebView player with YouTube fallback
    - Stream via IPTV (if IPTV connected and match found)
    - Download via Radarr/Sonarr (if configured)
+5. **Library Status**: Visual indicator showing if content is already in Plex library with added date
 
 ### Search Screen
 1. **Multi-Search**: Search both movies and TV shows
@@ -193,6 +197,8 @@ React Native: 0.79.2
 - **Authentication**: Token-based (placeholder for OAuth flow)
 - **Server Discovery**: Detect local Plex servers
 - **Library Sync**: Import watchlist from Plex
+- **Content Detection**: Automatically checks if movies/shows are in your Plex library
+- **Search by Title and Year**: Intelligent matching of TMDB content to Plex library items
 
 ## TypeScript & Type Safety
 
@@ -245,11 +251,16 @@ The app is running successfully with no errors. Recent activity shows:
 
 1. **expo-av Deprecation**: Will be removed in SDK 54. Currently using expo-audio and expo-video for new features.
 2. **TMDB Key Required**: For full functionality, users should add TMDB API key in Settings
-3. **App Clip Support**: Configured but not fully implemented
-4. **React Native 0.79.2**: Using patched version (see `patches/` folder)
+3. **Plex Library Matching**: Works best when Plex libraries use TMDB/TVDB agents for metadata
+4. **App Clip Support**: Configured but not fully implemented
+5. **React Native 0.79.2**: Using patched version (see `patches/` folder)
 
 ## Recent Changes
 
+- ✅ Fixed YouTube trailer playback error (Error 153) with enhanced WebView configuration
+- ✅ Added Plex library detection on details screen
+- ✅ Visual indicator showing when content is already in Plex library
+- ✅ Improved trailer modal with "Watch on YouTube" fallback button
 - ✅ TV tab now loads 20 real TMDB items with mock fallback
 - ✅ Movies tab separated from TV content
 - ✅ Provider rows (Netflix, Disney+, Prime) on both tabs
@@ -270,5 +281,5 @@ The app is running successfully with no errors. Recent activity shows:
 
 ---
 
-**Last Updated**: 2025-11-29
+**Last Updated**: 2025-11-30
 **Status**: Production Ready ✅

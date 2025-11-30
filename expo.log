@@ -9,3 +9,11 @@ iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
 iOS Bundled 2573ms index.ts (1372 modules)
  WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
  LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 41ms index.ts (1 module)
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 139ms index.ts (1 module)
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e

@@ -29,6 +29,8 @@ export default function DetailsScreen() {
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerKey, setTrailerKey] = useState<string | undefined>(undefined);
   const [iptvVodStream, setIptvVodStream] = useState<{ type: "movie" | "tv"; id: number } | null>(null);
+  const [plexItem, setPlexItem] = useState<any | null>(null);
+  const [checkingPlex, setCheckingPlex] = useState(false);
 
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useMediaStore();
 
@@ -38,6 +40,43 @@ export default function DetailsScreen() {
   useEffect(() => {
     loadItemDetails();
   }, [id, type]);
+
+  useEffect(() => {
+    if (item) {
+      checkPlexLibrary();
+    }
+  }, [item]);
+
+  const checkPlexLibrary = async () => {
+    if (!item) return;
+
+    try {
+      setCheckingPlex(true);
+      const settingsStore = (await import("../state/settingsStore")).default;
+      const { plex } = settingsStore.getState();
+
+      if (!plex.isConnected || !plex.serverUrl || !plex.token) {
+        setPlexItem(null);
+        return;
+      }
+
+      const plexService = (await import("../api/plex")).default;
+      plexService.setCredentials(plex.serverUrl, plex.token);
+
+      const title = isMovie ? (item as Movie).title : (item as TVShow).name;
+      const year = isMovie
+        ? (item as Movie).release_date ? new Date((item as Movie).release_date).getFullYear() : undefined
+        : (item as TVShow).first_air_date ? new Date((item as TVShow).first_air_date).getFullYear() : undefined;
+
+      const foundItem = await plexService.findMediaByTitle(title, year, type);
+      setPlexItem(foundItem);
+    } catch (error) {
+      console.error("Error checking Plex library:", error);
+      setPlexItem(null);
+    } finally {
+      setCheckingPlex(false);
+    }
+  };
 
   const loadItemDetails = async () => {
     try {
@@ -385,6 +424,35 @@ export default function DetailsScreen() {
             title={isMovie ? (item as Movie).title : (item as TVShow).name}
             onClose={() => setShowTrailer(false)}
           />
+
+          {/* Plex Library Status */}
+          {plexItem ? (
+            <View className="mb-6 p-4 bg-emerald-900/20 border border-emerald-700/40 rounded-xl">
+              <View className="flex-row items-center mb-2">
+                <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+                <Text className="text-emerald-400 text-lg font-semibold ml-2">
+                  In Your Plex Library
+                </Text>
+              </View>
+              <Text className="text-emerald-300/80 text-sm">
+                This {isMovie ? "movie" : "show"} is already available in your Plex library.
+              </Text>
+              {plexItem.addedAt && (
+                <Text className="text-emerald-300/60 text-xs mt-1">
+                  Added {new Date(plexItem.addedAt * 1000).toLocaleDateString()}
+                </Text>
+              )}
+            </View>
+          ) : checkingPlex ? (
+            <View className="mb-6 p-4 bg-gray-800/50 border border-gray-700/40 rounded-xl">
+              <View className="flex-row items-center">
+                <LoadingSpinner size="small" />
+                <Text className="text-gray-400 text-sm ml-3">
+                  Checking Plex library...
+                </Text>
+              </View>
+            </View>
+          ) : null}
 
           {/* Synopsis */}
           <View className="mb-6">
