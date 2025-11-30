@@ -87,9 +87,14 @@ class PlexService {
 
       const result = await WebBrowser.openAuthSessionAsync(authUrl, 'exp://');
 
+      // Check if user dismissed the browser
+      if (result.type === 'cancel' || result.type === 'dismiss') {
+        return null; // User cancelled
+      }
+
       // Step 3: Poll for auth token
       let attempts = 0;
-      const maxAttempts = 60; // 60 attempts = 1 minute
+      const maxAttempts = 30; // 30 attempts = 30 seconds
 
       while (attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
@@ -118,9 +123,13 @@ class PlexService {
         attempts++;
       }
 
-      throw new Error('Authentication timeout');
-    } catch (error) {
-      console.error('Plex authentication error:', error);
+      // Return null instead of throwing error to allow graceful handling
+      return null;
+    } catch (error: any) {
+      // Only log errors that aren't user cancellations
+      if (!error.message?.includes('cancel') && !error.message?.includes('dismiss')) {
+        console.error('Plex authentication error:', error);
+      }
       return null;
     }
   }

@@ -211,64 +211,68 @@ export default function PlexSettingsScreen() {
     try {
       const result = await plexService.authenticate();
 
-      if (result) {
-        const { authToken, servers } = result;
+      if (!result) {
+        Alert.alert(
+          "Login Cancelled",
+          "Plex authentication was cancelled or timed out. Please try again and make sure to complete the login in the browser.\n\nNote: You need to authorize the app in the Plex login page that opens."
+        );
+        setAuthenticating(false);
+        return;
+      }
 
-        if (servers.length === 0) {
+      const { authToken, servers } = result;
+
+      if (servers.length === 0) {
+        Alert.alert(
+          "No Servers Found",
+          "You don't have any Plex servers associated with your account. Please set up a Plex server first."
+        );
+        setAuthenticating(false);
+        return;
+      }
+
+      // Save the auth token
+      setToken(authToken);
+
+      // Save available servers
+      setAvailableServers(servers);
+
+      // If only one server, auto-select it
+      if (servers.length === 1) {
+        const server = servers[0];
+        const bestUrl = plexService.getBestServerUrl(server);
+
+        updatePlexSettings({
+          serverUrl: bestUrl,
+          token: authToken,
+        });
+
+        setServerUrl(bestUrl);
+
+        // Test connection and load libraries
+        plexService.setCredentials(bestUrl, authToken);
+        const connectionSuccess = await testPlexConnection();
+
+        if (connectionSuccess) {
+          await loadLibraries();
           Alert.alert(
-            "No Servers Found",
-            "You don't have any Plex servers associated with your account. Please set up a Plex server first."
-          );
-          setAuthenticating(false);
-          return;
-        }
-
-        // Save available servers
-        setAvailableServers(servers);
-
-        // If only one server, auto-select it
-        if (servers.length === 1) {
-          const server = servers[0];
-          const bestUrl = plexService.getBestServerUrl(server);
-
-          updatePlexSettings({
-            serverUrl: bestUrl,
-            token: authToken,
-          });
-
-          setServerUrl(bestUrl);
-          setToken(authToken);
-
-          // Test connection and load libraries
-          plexService.setCredentials(bestUrl, authToken);
-          const connectionSuccess = await testPlexConnection();
-
-          if (connectionSuccess) {
-            await loadLibraries();
-            Alert.alert(
-              "Login Successful!",
-              `Connected to ${server.name}\n\nYou can now browse your Plex library.`
-            );
-          }
-        } else {
-          // Multiple servers - show selection
-          Alert.alert(
-            "Select Your Server",
-            "You have multiple Plex servers. Please select one below.",
-            [{ text: "OK" }]
+            "Login Successful!",
+            `Connected to ${server.name}\n\nYou can now browse your Plex library.`
           );
         }
       } else {
+        // Multiple servers - show selection
         Alert.alert(
-          "Login Failed",
-          "Could not authenticate with Plex. Please try again or check your internet connection."
+          "Select Your Server",
+          `Found ${servers.length} Plex servers. Please select one below.`,
+          [{ text: "OK" }]
         );
       }
     } catch (error) {
       console.error("OAuth error:", error);
       Alert.alert(
         "Login Error",
-        "An error occurred during authentication. Please try again."
+        "An error occurred during authentication. Please try again or check your internet connection."
       );
     } finally {
       setAuthenticating(false);
@@ -337,16 +341,23 @@ export default function PlexSettingsScreen() {
         {!plex.isConnected && (
           <View className="mb-6">
             <ActionButton
-              title="Login with Plex"
+              title={authenticating ? "Waiting for login..." : "Login with Plex"}
               icon="log-in"
               onPress={handleOAuthLogin}
               loading={authenticating}
               variant="primary"
               fullWidth
             />
-            <Text className="text-gray-400 text-center text-sm mt-3">
-              Recommended: Easy one-tap authentication
-            </Text>
+            {authenticating && (
+              <Text className="text-yellow-400 text-center text-sm mt-3">
+                Please complete the login in the browser that opened...
+              </Text>
+            )}
+            {!authenticating && (
+              <Text className="text-gray-400 text-center text-sm mt-3">
+                Recommended: Easy one-tap authentication
+              </Text>
+            )}
           </View>
         )}
 
