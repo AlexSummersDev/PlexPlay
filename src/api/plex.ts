@@ -237,9 +237,12 @@ class PlexService {
   // Test connection to Plex server
   async testConnection(): Promise<boolean> {
     try {
-      await this.makeRequest("/");
+      console.log('[Plex] Testing connection to:', this.baseUrl);
+      const response = await this.makeRequest("/");
+      console.log('[Plex] Connection successful!');
       return true;
-    } catch (error) {
+    } catch (error: any) {
+      console.log('[Plex] Connection failed:', error.message);
       return false;
     }
   }

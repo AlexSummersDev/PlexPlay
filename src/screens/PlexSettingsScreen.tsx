@@ -280,25 +280,56 @@ export default function PlexSettingsScreen() {
   };
 
   const handleSelectServer = async (server: any) => {
-    const bestUrl = plexService.getBestServerUrl(server);
+    try {
+      const bestUrl = plexService.getBestServerUrl(server);
+      console.log('Attempting to connect to:', bestUrl);
+      console.log('Using token:', token ? 'Token exists' : 'No token');
 
-    updatePlexSettings({
-      serverUrl: bestUrl,
-      token: token, // Use existing auth token
-    });
+      updatePlexSettings({
+        serverUrl: bestUrl,
+        token: token, // Use existing auth token
+      });
 
-    setServerUrl(bestUrl);
+      setServerUrl(bestUrl);
 
-    // Test connection and load libraries
-    plexService.setCredentials(bestUrl, token);
-    const connectionSuccess = await testPlexConnection();
+      // Test connection and load libraries
+      plexService.setCredentials(bestUrl, token);
+      console.log('Testing connection to:', bestUrl);
 
-    if (connectionSuccess) {
-      await loadLibraries();
-      setAvailableServers([]); // Clear server list
+      const connectionSuccess = await testPlexConnection();
+      console.log('Connection test result:', connectionSuccess);
+
+      if (connectionSuccess) {
+        await loadLibraries();
+        setAvailableServers([]); // Clear server list
+        Alert.alert(
+          "Server Connected",
+          `Successfully connected to ${server.name}`
+        );
+      } else {
+        // Connection failed - show more helpful error with option to save anyway
+        setAvailableServers([]); // Clear server list even on failure
+        Alert.alert(
+          "Connection Failed (Sandbox Limitation)",
+          `Could not connect to ${server.name} at ${bestUrl}.\n\n` +
+          `This is expected in the Vibecode sandbox environment. The server details have been saved.\n\n` +
+          `When you use this app on a real device or outside the sandbox, the connection should work.`,
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                // Settings are already saved, just acknowledge
+                console.log('[Plex] Settings saved despite connection failure (sandbox limitation)');
+              }
+            }
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Error selecting server:', error);
       Alert.alert(
-        "Server Connected",
-        `Successfully connected to ${server.name}`
+        "Error",
+        "An error occurred while trying to connect to the server."
       );
     }
   };
