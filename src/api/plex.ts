@@ -42,19 +42,22 @@ class PlexService {
     this.token = token;
   }
 
-  private async makeRequest<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
+  private async makeRequest<T>(endpoint: string, params: Record<string, string> = {}, timeoutMs: number = 5000): Promise<T> {
     if (!this.baseUrl || !this.token) {
       throw new Error("Plex credentials not configured");
     }
 
     const url = new URL(`${this.baseUrl}${endpoint}`);
     url.searchParams.append("X-Plex-Token", this.token);
-    
+
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.append(key, value);
     });
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
       const response = await fetch(url.toString(), {
         headers: {
           "Accept": "application/json",
@@ -62,15 +65,21 @@ class PlexService {
           "X-Plex-Product": "Plex Media App",
           "X-Plex-Version": "1.0.0",
         },
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`Plex API Error: ${response.status} ${response.statusText}`);
       }
 
       return await response.json();
-    } catch (error) {
-      console.error("Plex API request failed:", error);
+    } catch (error: any) {
+      // Silently fail for timeout/network errors to avoid console spam
+      if (error.name === 'AbortError' || error.message?.includes('Network request failed') || error.message?.includes('timeout')) {
+        throw new Error('Plex connection timeout');
+      }
       throw error;
     }
   }

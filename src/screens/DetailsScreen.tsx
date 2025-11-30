@@ -70,8 +70,11 @@ export default function DetailsScreen() {
 
       const foundItem = await plexService.findMediaByTitle(title, year, type);
       setPlexItem(foundItem);
-    } catch (error) {
-      console.error("Error checking Plex library:", error);
+    } catch (error: any) {
+      // Silently fail for timeout/network errors
+      if (!error?.message?.includes('timeout') && !error?.message?.includes('Network')) {
+        console.error("Error checking Plex library:", error);
+      }
       setPlexItem(null);
     } finally {
       setCheckingPlex(false);

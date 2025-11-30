@@ -6,14 +6,31 @@ Starting Metro Bundler
 Waiting on http://localhost:8081
 Logs for your project will appear below.
 iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 2573ms index.ts (1372 modules)
- WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
- LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
-iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 1184ms index.ts (1372 modules)
 iOS Bundled 41ms index.ts (1 module)
  WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
  LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
-iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 139ms index.ts (1 module)
- WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
- LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
+ ERROR  Plex API request failed: [TypeError: Network request timed out]
+ LOG  [console.error: Plex API request failed: TypeError: Network request timed out]
+ ERROR  Error searching Plex library: [TypeError: Network request timed out]
+ LOG  [console.error: Error searching Plex library: TypeError: Network request timed out]
+ ERROR  Radarr API request failed: [TypeError: Network request timed out]
+ LOG  [console.error: Radarr API request failed: TypeError: Network request timed out]
+ ERROR  Radarr API request failed: [TypeError: Network request failed]
+ LOG  [console.error: Radarr API request failed: TypeError: Network request failed]
+ ERROR  Radarr API request failed: [TypeError: Network request failed]
+ LOG  [console.error: Radarr API request failed: TypeError: Network request failed]
+ ERROR  Radarr API request failed: [TypeError: Network request failed]
+ LOG  [console.error: Radarr API request failed: TypeError: Network request failed]
+ ERROR  Radarr API request failed: [TypeError: Network request failed]
+ LOG  [console.error: Radarr API request failed: TypeError: Network request failed]
+ ERROR  Radarr API request failed: [TypeError: Network request timed out]
+ LOG  [console.error: Radarr API request failed: TypeError: Network request timed out]
+ ERROR  Radarr API request failed: [TypeError: Network request timed out]
+ LOG  [console.error: Radarr API request failed: TypeError: Network request timed out]
+ ERROR  Radarr API request failed: [TypeError: Network request timed out]
+ LOG  [console.error: Radarr API request failed: TypeError: Network request timed out]
+ ERROR  Radarr API request failed: [TypeError: Network request timed out]
+ LOG  [console.error: Radarr API request failed: TypeError: Network request timed out]
+ ERROR  Radarr API request failed: [TypeError: Network request timed out]
+ LOG  [console.error: Radarr API request failed: TypeError: Network request timed out]
