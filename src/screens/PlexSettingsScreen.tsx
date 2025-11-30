@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TextInput, Switch, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import useSettingsStore from "../state/settingsStore";
-import { ActionButton, ConnectionStatus } from "../components";
+import { ActionButton, ConnectionStatus, LoadingSpinner } from "../components";
+import plexService from "../api/plex";
 
 export default function PlexSettingsScreen() {
   const {
@@ -16,6 +17,30 @@ export default function PlexSettingsScreen() {
   const [serverUrl, setServerUrl] = useState(plex.serverUrl);
   const [token, setToken] = useState(plex.token);
   const [testing, setTesting] = useState(false);
+  const [libraries, setLibraries] = useState<any[]>([]);
+  const [loadingLibraries, setLoadingLibraries] = useState(false);
+
+  useEffect(() => {
+    if (plex.isConnected && plex.serverUrl && plex.token) {
+      loadLibraries();
+    } else {
+      setLibraries([]);
+    }
+  }, [plex.isConnected]);
+
+  const loadLibraries = async () => {
+    try {
+      setLoadingLibraries(true);
+      plexService.setCredentials(plex.serverUrl, plex.token);
+      const libs = await plexService.getLibraries();
+      setLibraries(libs || []);
+    } catch (error) {
+      console.error("Error loading libraries:", error);
+      setLibraries([]);
+    } finally {
+      setLoadingLibraries(false);
+    }
+  };
 
   const handleSave = () => {
     updatePlexSettings({
@@ -40,14 +65,36 @@ export default function PlexSettingsScreen() {
     setTesting(true);
     try {
       const success = await testPlexConnection();
-      Alert.alert(
-        success ? "Connection Successful" : "Connection Failed",
-        success 
-          ? "Successfully connected to Plex server!" 
-          : "Could not connect to Plex server. Please check your settings."
-      );
+
+      if (success) {
+        // Load libraries after successful connection
+        await loadLibraries();
+
+        // Check if we found any libraries
+        const libCount = libraries.length;
+
+        if (libCount === 0) {
+          Alert.alert(
+            "Connection Successful",
+            "Connected to Plex server, but no libraries were found. Please check your Plex server configuration."
+          );
+        } else {
+          Alert.alert(
+            "Connection Successful",
+            `Successfully connected to Plex server!\n\nFound ${libCount} ${libCount === 1 ? 'library' : 'libraries'}.`
+          );
+        }
+      } else {
+        Alert.alert(
+          "Connection Failed",
+          "Could not connect to Plex server. Please check:\n\n• Server URL is correct and includes port (e.g., :32400)\n• Server is running and accessible\n• Token is valid\n• No firewall blocking the connection"
+        );
+      }
     } catch (error) {
-      Alert.alert("Connection Error", "An error occurred while testing the connection.");
+      Alert.alert(
+        "Connection Error",
+        "An error occurred while testing the connection. Please verify your settings and try again."
+      );
     } finally {
       setTesting(false);
     }
@@ -66,6 +113,7 @@ export default function PlexSettingsScreen() {
             resetPlexSettings();
             setServerUrl("");
             setToken("");
+            setLibraries([]);
             Alert.alert("Settings Reset", "Plex settings have been reset.");
           },
         },
@@ -94,7 +142,7 @@ export default function PlexSettingsScreen() {
           <Text className="text-white text-lg font-semibold mb-4">
             Server Configuration
           </Text>
-          
+
           <View className="mb-4">
             <Text className="text-gray-300 text-sm font-medium mb-2">
               Server URL
@@ -157,7 +205,7 @@ export default function PlexSettingsScreen() {
           <Text className="text-white text-lg font-semibold mb-4">
             Library Settings
           </Text>
-          
+
           <View className="bg-gray-800/50 rounded-lg p-4 mb-4">
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
@@ -177,7 +225,54 @@ export default function PlexSettingsScreen() {
             </View>
           </View>
 
-          {plex.isConnected && (
+          {plex.isConnected ? (
+            loadingLibraries ? (
+              <View className="bg-gray-800/50 rounded-lg p-4">
+                <View className="flex-row items-center">
+                  <LoadingSpinner size="small" />
+                  <Text className="text-gray-400 text-sm ml-3">
+                    Loading libraries...
+                  </Text>
+                </View>
+              </View>
+            ) : libraries.length > 0 ? (
+              <View className="bg-gray-800/50 rounded-lg p-4">
+                <Text className="text-white font-medium mb-3">
+                  Available Libraries ({libraries.length})
+                </Text>
+                {libraries.map((library) => (
+                  <View
+                    key={library.key}
+                    className="flex-row items-center py-2 border-b border-gray-700/50 last:border-b-0"
+                  >
+                    <Ionicons
+                      name={library.type === "movie" ? "film" : library.type === "show" ? "tv" : "folder"}
+                      size={20}
+                      color="#9CA3AF"
+                    />
+                    <View className="ml-3 flex-1">
+                      <Text className="text-white text-sm">{library.title}</Text>
+                      <Text className="text-gray-400 text-xs capitalize">{library.type}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View className="bg-yellow-900/20 border border-yellow-700/40 rounded-lg p-4">
+                <View className="flex-row items-start">
+                  <Ionicons name="warning" size={20} color="#F59E0B" />
+                  <View className="ml-3 flex-1">
+                    <Text className="text-yellow-300 font-medium mb-1">
+                      No Libraries Found
+                    </Text>
+                    <Text className="text-yellow-200 text-sm">
+                      Connected to Plex server but no libraries were detected. Please check your Plex server configuration.
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            )
+          ) : (
             <View className="bg-gray-800/50 rounded-lg p-4">
               <Text className="text-white font-medium mb-2">
                 Available Libraries
@@ -194,7 +289,7 @@ export default function PlexSettingsScreen() {
           <Text className="text-white text-lg font-semibold mb-4">
             Help & Information
           </Text>
-          
+
           <View className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-4">
             <View className="flex-row items-start">
               <Ionicons name="information-circle" size={20} color="#60A5FA" />

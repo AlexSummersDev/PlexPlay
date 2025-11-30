@@ -170,20 +170,23 @@ const useSettingsStore = create<SettingsState>()(
       testPlexConnection: async () => {
         const { plex } = get();
         if (!plex.serverUrl || !plex.token) return false;
-        
+
         try {
-          // Mock connection test - in real implementation, this would make an API call
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          const isConnected = Math.random() > 0.3; // 70% success rate for demo
-          
-          set({ 
-            plex: { ...plex, isConnected } 
+          const plexService = (await import("../api/plex")).default;
+          plexService.setCredentials(plex.serverUrl, plex.token);
+
+          // Try to fetch libraries to verify the connection
+          const libraries = await plexService.getLibraries();
+          const isConnected = libraries && libraries.length > 0;
+
+          set({
+            plex: { ...plex, isConnected }
           });
-          
+
           return isConnected;
         } catch (error) {
-          set({ 
-            plex: { ...plex, isConnected: false } 
+          set({
+            plex: { ...plex, isConnected: false }
           });
           return false;
         }
