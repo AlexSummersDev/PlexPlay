@@ -6,10 +6,8 @@ Starting Metro Bundler
 Waiting on http://localhost:8081
 Logs for your project will appear below.
 iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 1073ms index.ts (1374 modules)
-iOS Bundled 475ms index.ts (1364 modules)
-iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 60ms index.ts (1 module)
+iOS Bundled 1023ms index.ts (1328 modules)
+iOS Bundled 456ms index.ts (1372 modules)
  WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
  LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
-iOS Bundled 502ms src/state/settingsStore.ts (782 modules)
+iOS Bundled 311ms src/state/settingsStore.ts (761 modules)
