@@ -286,6 +286,13 @@ The app is running successfully with no errors. Recent activity shows:
 3. **Plex Library Matching**: Works best when Plex libraries use TMDB/TVDB agents for metadata
 4. **App Clip Support**: Configured but not fully implemented
 5. **React Native 0.79.2**: Using patched version (see `patches/` folder)
+6. **Vibecode Sandbox Limitations**:
+   - Local network access to Plex servers may be restricted in the sandbox environment
+   - For full Plex functionality, consider:
+     - Using Plex remote access with public URLs
+     - Setting up port forwarding on your router
+     - Deploying the app to a physical device
+     - Using plex.direct URLs for remote access
 
 ## Recent Changes
 

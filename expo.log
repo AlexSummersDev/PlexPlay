@@ -6,20 +6,14 @@ Starting Metro Bundler
 Waiting on http://localhost:8081
 Logs for your project will appear below.
 iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 1242ms index.ts (1371 modules)
-iOS Bundled 41ms index.ts (1 module)
-iOS Bundled 50ms index.ts (1 module)
-iOS Bundled 36ms index.ts (1 module)
+iOS Bundled 1155ms index.ts (1371 modules)
+iOS Bundled 42ms index.ts (1 module)
+iOS Bundled 51ms index.ts (1 module)
+iOS Bundled 37ms index.ts (1 module)
 iOS Bundled 37ms index.ts (1 module)
  WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
  LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
- ERROR  Error loading libraries: [Error: Plex connection timeout]
- LOG  [console.error: Error loading libraries: Error: Plex connection timeout]
 iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 40ms index.ts (1 module)
- WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
- LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
-iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 156ms index.ts (1 module)
+iOS Bundled 114ms index.ts (1 module)
  WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
  LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e

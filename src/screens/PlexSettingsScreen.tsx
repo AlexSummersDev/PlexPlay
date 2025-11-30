@@ -164,7 +164,9 @@ export default function PlexSettingsScreen() {
           "• Server is running and accessible\n" +
           "• Token is valid (20-character string)\n" +
           "• No firewall blocking port 32400\n" +
-          "• You're on the same network (for local servers)"
+          "• You're on the same network (for local servers)\n\n" +
+          "⚠️ Development Environment:\n" +
+          "If in Vibecode sandbox, local network access may be restricted. Consider using Plex remote access or deploying to a real device."
         );
       }
     } catch (error) {
@@ -213,6 +215,28 @@ export default function PlexSettingsScreen() {
             lastChecked={new Date()}
           />
         </View>
+
+        {/* Sandbox Warning */}
+        {!plex.isConnected && (
+          <View className="bg-orange-900/20 border border-orange-700/40 rounded-lg p-4 mb-6">
+            <View className="flex-row items-start">
+              <Ionicons name="warning" size={20} color="#FB923C" />
+              <View className="ml-3 flex-1">
+                <Text className="text-orange-300 font-medium mb-1">
+                  Development Environment Limitations
+                </Text>
+                <Text className="text-orange-200 text-sm leading-5">
+                  If you're running this in Vibecode's sandbox, local network access to your Plex server may be restricted. For full Plex functionality, you may need to:
+                  {"\n\n"}
+                  • Use a publicly accessible Plex URL{"\n"}
+                  • Set up port forwarding on your router{"\n"}
+                  • Use Plex.tv remote access{"\n"}
+                  • Deploy the app to a physical device
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
 
         {/* Server Configuration */}
         <View className="mb-6">
@@ -411,6 +435,25 @@ export default function PlexSettingsScreen() {
                   3. Find your local IP address{"\n"}
                   4. Format: http://[IP]:32400{"\n\n"}
                   Example: http://192.168.1.100:32400
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View className="bg-amber-900/20 border border-amber-700/40 rounded-lg p-4 mb-4">
+            <View className="flex-row items-start">
+              <Ionicons name="globe" size={20} color="#FBBF24" />
+              <View className="ml-3 flex-1">
+                <Text className="text-amber-300 font-medium mb-1">
+                  Remote Access Alternative
+                </Text>
+                <Text className="text-amber-200 text-sm leading-5">
+                  If local network access doesn't work:{"\n\n"}
+                  1. Enable Remote Access in Plex settings{"\n"}
+                  2. Use your public Plex URL{"\n"}
+                  3. Format: https://[publicIP]:32400{"\n"}
+                  4. Or use plex.direct URLs{"\n\n"}
+                  This bypasses local network restrictions and works from anywhere.
                 </Text>
               </View>
             </View>
