@@ -163,22 +163,32 @@ class PlexService {
   getBestServerUrl(server: PlexServer): string {
     const port = server.port || 32400; // Default to 32400 if port is undefined
 
-    // Prefer local address if available
+    // Priority 1: Local addresses (use HTTP)
     if (server.localAddresses && server.localAddresses.length > 0) {
       return `http://${server.localAddresses[0]}:${port}`;
     }
 
-    // Then public address
+    // Priority 2: If we have a public address, try HTTP first (many servers don't have proper SSL)
     if (server.publicAddress) {
-      return `https://${server.publicAddress}:${port}`;
+      // Check if it's an IP address (not a domain)
+      const isIP = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(server.publicAddress);
+
+      // Use HTTP for IP addresses, HTTPS for domains
+      const protocol = isIP ? 'http' : 'https';
+      return `${protocol}://${server.publicAddress}:${port}`;
     }
 
-    // Fallback to address
+    // Priority 3: Use the address field
     if (server.address) {
-      return server.address.includes('://') ? server.address : `http://${server.address}:${port}`;
+      // If address already has protocol, use it as-is
+      if (server.address.includes('://')) {
+        return server.address;
+      }
+      // Otherwise add http
+      return `http://${server.address}:${port}`;
     }
 
-    // Last resort - use host
+    // Priority 4: Last resort - use host
     return `http://${server.host}:${port}`;
   }
 
