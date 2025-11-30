@@ -156,18 +156,25 @@ class PlexService {
 
   // Get best connection URL for a server
   getBestServerUrl(server: PlexServer): string {
+    const port = server.port || 32400; // Default to 32400 if port is undefined
+
     // Prefer local address if available
     if (server.localAddresses && server.localAddresses.length > 0) {
-      return `http://${server.localAddresses[0]}:${server.port}`;
+      return `http://${server.localAddresses[0]}:${port}`;
     }
 
     // Then public address
     if (server.publicAddress) {
-      return `https://${server.publicAddress}:${server.port}`;
+      return `https://${server.publicAddress}:${port}`;
     }
 
     // Fallback to address
-    return server.address;
+    if (server.address) {
+      return server.address.includes('://') ? server.address : `http://${server.address}:${port}`;
+    }
+
+    // Last resort - use host
+    return `http://${server.host}:${port}`;
   }
 
   private async makeRequest<T>(endpoint: string, params: Record<string, string> = {}, timeoutMs: number = 5000): Promise<T> {

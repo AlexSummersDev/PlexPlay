@@ -301,7 +301,12 @@ export default function PlexSettingsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 px-4"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled={true}
+      >
         {/* Connection Status */}
         <View className="mb-6">
           <ConnectionStatus
@@ -347,26 +352,32 @@ export default function PlexSettingsScreen() {
 
         {/* Server Selection */}
         {availableServers.length > 0 && (
-          <View className="mb-6">
+          <View className="mb-6" pointerEvents="box-none">
             <Text className="text-white text-lg font-semibold mb-4">
               Select Your Plex Server
             </Text>
             {availableServers.map((server, index) => (
               <Pressable
-                key={index}
-                onPress={() => handleSelectServer(server)}
+                key={`${server.machineIdentifier}-${index}`}
+                onPress={() => {
+                  console.log('Server pressed:', server.name);
+                  handleSelectServer(server);
+                }}
                 className="bg-gray-800/50 rounded-lg p-4 mb-3"
                 style={({ pressed }) => ({
                   opacity: pressed ? 0.7 : 1,
                 })}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center justify-between" pointerEvents="none">
                   <View className="flex-1">
                     <Text className="text-white font-medium text-base">
                       {server.name}
                     </Text>
                     <Text className="text-gray-400 text-sm mt-1">
-                      {server.localAddresses?.[0] || server.publicAddress || server.address}
+                      {server.localAddresses?.[0] ? `${server.localAddresses[0]}:${server.port || 32400}` :
+                       server.publicAddress ? `${server.publicAddress}:${server.port || 32400}` :
+                       server.address || 'Unknown address'}
                     </Text>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color="#6B7280" />
