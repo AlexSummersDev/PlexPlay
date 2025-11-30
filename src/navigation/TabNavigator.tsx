@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { RootTabParamList } from "../types/navigation";
 import MoviesStack from "./MoviesStack";
 import TVShowsStack from "./TVShowsStack";
-import LiveTVStack from "./LiveTVStack";
+import SearchStack from "./SearchStack";
 import SettingsStack from "./SettingsStack";
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -20,8 +20,8 @@ export default function TabNavigator() {
             iconName = focused ? "film" : "film-outline";
           } else if (route.name === "TVShows") {
             iconName = focused ? "tv" : "tv-outline";
-          } else if (route.name === "LiveTV") {
-            iconName = focused ? "radio" : "radio-outline";
+          } else if (route.name === "Search") {
+            iconName = focused ? "search" : "search-outline";
           } else if (route.name === "Settings") {
             iconName = focused ? "settings" : "settings-outline";
           } else {
@@ -39,23 +39,23 @@ export default function TabNavigator() {
         headerShown: false,
       })}
     >
-      <Tab.Screen 
-        name="Movies" 
+      <Tab.Screen
+        name="Movies"
         component={MoviesStack}
         options={{ tabBarLabel: "Movies" }}
       />
-      <Tab.Screen 
-        name="TVShows" 
+      <Tab.Screen
+        name="TVShows"
         component={TVShowsStack}
         options={{ tabBarLabel: "TV Shows" }}
       />
-      <Tab.Screen 
-        name="LiveTV" 
-        component={LiveTVStack}
-        options={{ tabBarLabel: "Live TV" }}
+      <Tab.Screen
+        name="Search"
+        component={SearchStack}
+        options={{ tabBarLabel: "Search" }}
       />
-      <Tab.Screen 
-        name="Settings" 
+      <Tab.Screen
+        name="Settings"
         component={SettingsStack}
         options={{ tabBarLabel: "Settings" }}
       />

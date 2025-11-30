@@ -6,8 +6,13 @@ Starting Metro Bundler
 Waiting on http://localhost:8081
 Logs for your project will appear below.
 iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 1421ms index.ts (1359 modules)
-iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 48ms index.ts (1 module)
+iOS ./index.ts ▓▓▓▓▓▓▓▓▓▓▓▓░░░░ 78.7% ( 988/1116)
+iOS Bundled 4255ms index.ts (1372 modules)
  WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
  LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
+ LOG  [ReferenceError: Property 'LiveTVStack' doesn't exist]
+ LOG  [ReferenceError: Property 'LiveTVStack' doesn't exist]
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 106ms index.ts (1 module)
+ LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.

@@ -437,14 +437,28 @@ export default function DetailsScreen() {
                   In Your Plex Library
                 </Text>
               </View>
-              <Text className="text-emerald-300/80 text-sm">
+              <Text className="text-emerald-300/80 text-sm mb-3">
                 This {isMovie ? "movie" : "show"} is already available in your Plex library.
               </Text>
               {plexItem.addedAt && (
-                <Text className="text-emerald-300/60 text-xs mt-1">
+                <Text className="text-emerald-300/60 text-xs mb-3">
                   Added {new Date(plexItem.addedAt * 1000).toLocaleDateString()}
                 </Text>
               )}
+              <ActionButton
+                title="Play from Plex"
+                icon="play-circle"
+                onPress={() => {
+                  const navProp = navigation as any;
+                  navProp.navigate("PlexPlayer", {
+                    ratingKey: plexItem.ratingKey,
+                    title: isMovie ? (item as Movie).title : (item as TVShow).name,
+                    type: isMovie ? "movie" : "tv"
+                  });
+                }}
+                variant="primary"
+                className="mt-2"
+              />
             </View>
           ) : checkingPlex ? (
             <View className="mb-6 p-4 bg-gray-800/50 border border-gray-700/40 rounded-xl">

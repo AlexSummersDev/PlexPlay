@@ -18,6 +18,15 @@ React Native: 0.79.2
 - **Type Safety**: TypeScript with full type checking (0 errors)
 - **Package Manager**: Bun
 
+### Navigation Structure
+The app uses a bottom tab navigator with 4 tabs:
+1. **Movies** - Browse and discover movies
+2. **TV Shows** - Browse and discover TV series
+3. **Search** - Unified search for all content types
+4. **Settings** - Configure integrations and preferences
+
+**Note**: Live TV has been replaced with a dedicated Search tab for better user experience.
+
 ### App Structure
 
 ```
@@ -40,6 +49,7 @@ React Native: 0.79.2
 │   │   ├── TVHomeScreen.tsx         # TV shows home
 │   │   ├── SearchScreen.tsx         # Search functionality
 │   │   ├── DetailsScreen.tsx        # Media details
+│   │   ├── PlexPlayerScreen.tsx     # Plex video player
 │   │   ├── LiveTVScreen.tsx         # IPTV channels
 │   │   ├── LiveTVPlayerScreen.tsx   # IPTV player
 │   │   ├── SettingsScreen.tsx       # Main settings
@@ -49,9 +59,10 @@ React Native: 0.79.2
 │   │   └── ProvidersBrowserScreen.tsx
 │   │
 │   ├── navigation/          # Navigation stacks
-│   │   ├── TabNavigator.tsx         # Bottom tabs
+│   │   ├── TabNavigator.tsx         # Bottom tabs (Movies, TV Shows, Search, Settings)
 │   │   ├── MoviesStack.tsx
 │   │   ├── TVShowsStack.tsx
+│   │   ├── SearchStack.tsx
 │   │   ├── LiveTVStack.tsx
 │   │   └── SettingsStack.tsx
 │   │
@@ -93,12 +104,18 @@ React Native: 0.79.2
 
 ### 🎬 Movies & TV Shows
 - **Browse**: Popular, Trending, Top Rated, Upcoming (Movies) / Airing Today (TV)
-- **Search**: Multi-search with filtering by type (movies/TV)
+- **Search**: Dedicated search tab at the bottom for unified search across all content
+- **Multi-Search**: Search with filtering by type (movies/TV)
 - **Integrated Search**: Bottom-of-screen search on Movies home with Plex library detection
   - Separate sections for movies in Plex library vs. available to download
   - Quick actions for downloading and viewing trailers
   - Real-time Plex library matching
 - **Details**: Full metadata, cast, trailers, similar content, recommendations
+- **Plex Playback**: Direct video playback from your Plex library
+  - "Play from Plex" button appears when content is in your library
+  - Full-screen video player with playback controls
+  - Seek forward/backward 10 seconds
+  - Progress bar with time indicators
 - **Watchlist**: Persistent watchlist with AsyncStorage
 - **Provider Filtering**: Browse by streaming service (Netflix, Disney+, Prime Video)
 - **Plex Integration**: Automatically checks if content is in your Plex library on details screen
@@ -155,9 +172,10 @@ React Native: 0.79.2
 4. **Actions Available**:
    - Add/Remove from watchlist (always available)
    - Play trailer (when available) - Enhanced WebView player with YouTube fallback
+   - **Play from Plex** (when content is in your library) - Opens full-screen video player
    - Stream via IPTV (if IPTV connected and match found)
    - Download via Radarr/Sonarr (if configured)
-5. **Library Status**: Visual indicator showing if content is already in Plex library with added date
+5. **Library Status**: Visual indicator showing if content is already in Plex library with added date and play button
 
 ### Search Screen
 1. **Multi-Search**: Search both movies and TV shows
@@ -208,6 +226,11 @@ React Native: 0.79.2
 - **Library Sync**: Import watchlist from Plex
 - **Content Detection**: Automatically checks if movies/shows are in your Plex library
 - **Search by Title and Year**: Intelligent matching of TMDB content to Plex library items
+- **Video Playback**: Direct streaming from Plex with full playback controls
+  - Supports movies and TV shows
+  - Progress tracking with time display
+  - Seek controls (±10 seconds)
+  - Full-screen playback interface
 
 ## TypeScript & Type Safety
 
@@ -266,6 +289,10 @@ The app is running successfully with no errors. Recent activity shows:
 
 ## Recent Changes
 
+- ✅ **Replaced Live TV tab with Search tab** - Improved navigation with dedicated search at the bottom
+- ✅ **Added Plex video player** - Direct playback from Plex library with full controls
+- ✅ **Play from Plex button** - Instantly play content that's in your Plex library
+- ✅ **Full-screen video player** - Professional playback interface with seek controls
 - ✅ Added integrated search at bottom of Movies home screen
 - ✅ Plex library detection in search results with visual separation
 - ✅ Quick action buttons for download and trailer on search results

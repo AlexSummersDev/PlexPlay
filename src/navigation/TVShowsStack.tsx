@@ -4,6 +4,7 @@ import { TVShowsStackParamList } from "../types/navigation";
 import TVHomeScreen from "../screens/TVHomeScreen";
 import SearchScreen from "../screens/SearchScreen";
 import DetailsScreen from "../screens/DetailsScreen";
+import PlexPlayerScreen from "../screens/PlexPlayerScreen";
 
 const Stack = createNativeStackNavigator<TVShowsStackParamList>();
 
@@ -37,13 +38,21 @@ export default function TVShowsStack() {
           headerLargeTitle: false,
         }}
       />
-      <Stack.Screen 
-        name="Details" 
+      <Stack.Screen
+        name="Details"
         component={DetailsScreen}
-        options={{ 
+        options={{
           title: "",
           headerLargeTitle: false,
           headerTransparent: true,
+        }}
+      />
+      <Stack.Screen
+        name="PlexPlayer"
+        component={PlexPlayerScreen}
+        options={{
+          headerShown: false,
+          presentation: "fullScreenModal",
         }}
       />
     </Stack.Navigator>
