@@ -6,20 +6,10 @@ Starting Metro Bundler
 Waiting on http://localhost:8081
 Logs for your project will appear below.
 iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 3011ms index.ts (1372 modules)
+iOS Bundled 1073ms index.ts (1374 modules)
+iOS Bundled 475ms index.ts (1364 modules)
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 60ms index.ts (1 module)
  WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Please use the `expo-audio` and `expo-video` packages to replace the required functionality.
  LOG  [index] Project ID is:  3f49df20-2679-4d42-8fdd-151df329cc0e
-iOS Bundled 320ms src/state/settingsStore.ts (722 modules)
- WARN  Found screens with the same name nested inside one another. Check:
-
-Search, Search > Search
-
-This can cause confusing behavior during navigation. Consider using unique names for each screen instead.
-iOS src/api/plex.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
-iOS Bundled 480ms src/api/plex.ts (842 modules)
- LOG  Server pressed: NotYourPlex
- LOG  Attempting to connect to: http://46.110.144.162:32400
- LOG  Using token: Token exists
- LOG  Testing connection to: http://46.110.144.162:32400
- LOG  Connection test result: false
- LOG  [Plex] Settings saved despite connection failure (sandbox limitation)
+iOS Bundled 502ms src/state/settingsStore.ts (782 modules)
